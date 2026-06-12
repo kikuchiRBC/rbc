@@ -108,6 +108,15 @@ const questions  = [
   { q: "よく、兄と＜そっくり＞だと言われます。", a: "似ている", ops: ["似ている", "仲がいい", "合わない", "出かける"] },
   { q: "なにか、もっといい＜方法＞はありませんか。", a: "やり方", ops: ["話し方", "飲み方", "食べ方", "やり方"] },
   { q: "林さんはいつも＜勝手＞に行動するので、よく部長に注意される。", a: "許可なく", ops: ["突然", "自然に", "不まじめに", "許可なく"] }
+,
+  { q: "長い時間スマホを見ていたら、目が＜いたく＞なった。", a: "痛く", ops: ["病く", "痛く", "症く", "疲く"] },
+  { q: "10年後の＜みらい＞は、どうなっているのでしょうか。", a: "未来", ops: ["未来", "来未", "末来", "末末"] },
+  { q: "ここにある飲み物は、＜じゆう＞に飲んでいいです。", a: "自由", ops: ["自申", "白由", "自中", "自由"] },
+  { q: "この店の料理は、味が＜うすい＞。", a: "薄い", ops: ["薄い", "細い", "軽い", "弱い"] },
+  { q: "この書類を田中さんに（　　　）ください。", a: "渡して", ops: ["持して", "渡して", "伝して", "連して"] },
+  { q: "このいすは＜かるい＞ですね。", a: "軽い", ops: ["軽い", "厚い", "短い", "重い"] },
+  { q: "夜になるとカエルの＜なき＞声が聞こえる。", a: "鳴き", ops: ["烏き", "鳥き", "島き", "鳴き"] },
+  { q: "久しぶりに＜うんてん＞をしました。", a: "運転", ops: ["軍軽", "運慶", "運転", "軍転"] },
 
 ];
 
@@ -153,24 +162,31 @@ const audio = document.getElementById('bgm');
     }, 300);
 }
 
-    function loadQuestion() {
-        const qData = questions[Math.floor(Math.random() * questions.length)];
-        document.getElementById('text').innerHTML = `<b>【問題】</b><br>${qData.q}`;
-        const optionsDiv = document.getElementById('options');
-        optionsDiv.innerHTML = '';
-        
-        qData.ops.sort(() => Math.random() - 0.5).forEach(op => {
-            const btn = document.createElement('button');
-            btn.innerText = op;
-            btn.onclick = () => checkAnswer(op, qData.a);
-            optionsDiv.appendChild(btn);
-        });
-    }
+   let currentAnswer = "";
+
+function loadQuestion() {
+    const qData = questions[Math.floor(Math.random() * questions.length)];
+
+    currentAnswer = qData.a; // ← これ追加
+
+    document.getElementById('text').innerHTML = `<b>【問題】</b><br>${qData.q}`;
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+    
+    qData.ops.sort(() => Math.random() - 0.5).forEach(op => {
+        const btn = document.createElement('button');
+        btn.innerText = op;
+        btn.onclick = () => checkAnswer(op, qData.a);
+        optionsDiv.appendChild(btn);
+    });
+}
+
 
 function checkAnswer(selected, correct) {
 
     const textEl = document.getElementById('text');
 
+    // ✅ 正解
     if (selected === correct) {
 
         monsterImg.style.transform =
@@ -191,83 +207,15 @@ function checkAnswer(selected, correct) {
             ${bossStreak}/5
             </span>`;
 
-            if (bossStreak >= 5) {
-
-                textEl.innerHTML =
-                `<span style='color:#0f0;font-size:1.3rem'>
-                おめでとう！
-                <br>
-                魔王（まおう）を倒した！
-                <br>
-                菊池先生にキーワードを伝えるとプレゼントがもらえるよ！
-                <br>
-                キーワード：まおうをたおしたよ
-                </span>`;
-
-                setTimeout(() => {
-
-                    alert("ゲームクリア！");
-
-                    hp = 100;
-                    exp = 0;
-                    lv = 1;
-
-                    bossBattle = false;
-                    bossStreak = 0;
-
-                    updateStats();
-                    changeMonster();
-                    loadQuestion();
-
-                }, 3000);
-
-                return;
-            }
-
         } else {
 
             exp += 50;
 
             textEl.innerHTML =
             "<span style='color:#0f0'>正解！ ダメージを与えた！</span>";
-
-            if (exp >= 100) {
-
-                lv++;
-                exp = 0;
-
-                if (lv >= 20) {
-
-                    bossBattle = true;
-                    bossStreak = 0;
-
-                    document.body.style.background = "#300";
-
-                    setTimeout(() => {
-                        document.body.style.background = "#000";
-                    }, 1000);
-
-                    monsterImg.src = bossImage;
-
-                    textEl.innerHTML =
-                    `<span style='color:#f0f;font-size:1.3rem'>
-                    ★ 魔王出現！ ★
-                    <br>
-                    5問連続正解で勝利！
-                    </span>`;
-
-                } else {
-
-                    textEl.innerHTML =
-                    "<span style='color:#ff0'>モンスターを倒した！ 次の敵が現れた！</span>";
-
-                    changeMonster();
-                }
-
-                hp = Math.min(hp + 20, 100);
-            }
         }
 
+    // ✅ 不正解（←ここが重要）
     } else {
 
         document.body.style.background = "#400";
@@ -283,22 +231,28 @@ function checkAnswer(selected, correct) {
             bossStreak = 0;
 
             textEl.innerHTML =
-            "<span style='color:#f00'>魔王の反撃！ 連続正解がリセットされた！</span>";
+            `<span style='color:#f00'>
+            魔王の反撃！
+            <br>
+            正解：${correct}
+            </span>`;
 
         } else {
 
             textEl.innerHTML =
-            "<span style='color:#f00'>ミス！ 20ダメージを受けた！</span>";
+            `<span style='color:#f00'>
+            ミス！ 20ダメージ
+            <br>
+            正解：${correct}
+            </span>`;
         }
 
         if (hp <= 0) {
-
             alert("目の前が真っ暗になった...");
 
             hp = 100;
             exp = 0;
             lv = 1;
-
             bossBattle = false;
             bossStreak = 0;
 
@@ -309,21 +263,16 @@ function checkAnswer(selected, correct) {
     updateStats();
 
     setTimeout(() => {
-
-        if (!(bossBattle && bossStreak >= 5)) {
-            loadQuestion();
-        }
-
+        loadQuestion();
     }, 1200);
 
 
-    }
 
     function updateStats() {
         document.getElementById('hp').innerText = hp;
         document.getElementById('exp').innerText = exp;
         document.getElementById('lv').innerText = lv;
-    }
+    }}
 </script>
 </body>
 </html>
