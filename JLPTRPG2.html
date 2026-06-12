@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>JLPT Monster Hunter: Boss Rush</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+        body { background: #000; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        #game-container { width: 450px; background: #000; border: 4px solid #fff; padding: 20px; position: relative; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .stats { display: flex; justify-content: space-between; font-size: 1.2rem; margin-bottom: 10px; border-bottom: 2px solid #fff; padding-bottom: 5px; }
+        #monster-area { height: 200px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; position: relative; overflow: hidden; }
+        #monster-img { height: 180px; transition: transform 0.3s, opacity 0.3s; }
+        .monster-fade-in { animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { transform: translateY(-200px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #message-window { height: 80px; border: 2px solid #fff; padding: 10px; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; background: rgba(255,255,255,0.05); }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: #000; color: #fff; border: 2px solid #fff; padding: 10px; font-family: 'DotGothic16', sans-serif; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #fff; color: #000; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="stats">
+        <span>LV: <span id="lv">1</span></span>
+        <span>HP: <span id="hp">100</span></span>
+        <span>EXP: <span id="exp">0</span></span>
+    </div>
+    <div id="monster-area">
+        <img id="monster-img" src="monster-3eyes-1024x1024.png" alt="Monster">
+    </div>
+    <div id="message-window">
+        <div id="text">冒険が始まる！<br>モンスターを倒してレベルを上げよう！</div>
+    </div>
+    <div class="options-grid" id="options">
+        <button onclick="startGame()">冒険をはじめる</button>
+    </div>
+</div>
+
+<audio id="bgm" loop>
+    <source src="maou_bgm_8bit27.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    // モンスターの画像リスト
+    const monsterImages = [
+        "oni.png", // 鬼
+        "dragon.jpg", // ドラゴン風
+        "slime-c.png", // スライム風）
+        "night[.png" , // 騎士風
+        "monnene.jpg"  // モンエネ）
+    ];
+
+const questions  = [
+
+  { q: "留学は楽しいこと（　　　）ではない。", a: "ばかり", ops: ["ばかり", "だけ", "ほど", "くらい"] },
+  { q: "仕事に慣れる（　　　）、笑顔でお客様と話せるようになってきた。", a: "にしたがって", ops: ["にしたがって", "あいだに", "ところで", "あとで"] },
+  { q: "三日間降り続けた雨が（　　　）やんだ。", a: "ようやく", ops: ["ようやく", "とつぜん", "すでに", "まもなく"] },
+  { q: "インターネットで買い物をするのは、便利（　　　）怖いこともある。", a: "である一方で", ops: ["である一方で", "なので", "だから", "なら"] },
+  { q: "赤ちゃんは何でも口に（　　　）たがる。", a: "入れ", ops: ["入れ", "出し", "触れ", "取り"] },
+  { q: "ごめんね。約束の時間に（　　　）。", a: "間に合いそうになくて", ops: ["間に合いそうになくて", "間に合ったので", "間に合いながら", "間に合うけれど"] },
+  { q: "危険！池に（　　　）。", a: "入るな", ops: ["入るな", "入ろう", "入れる", "入った"] },
+  { q: "気に入ったものはつい（　　　）。", a: "買ってしまう", ops: ["買ってしまう", "買っている", "買っていた", "買わせる"] },
+  { q: "よく同じ猫が来る。今日（　　　）2回見た。", a: "だけでも", ops: ["だけでも", "しか", "だけ", "ばかり"] },
+  { q: "今日は晴れると言っていたので、傘を（　　　）出かけた。", a: "持たないで", ops: ["持たないで", "持つので", "持ちながら", "持とうと"] },
+  { q: "受験勉強も大変だったが、大学に（　　　）もっと大変だった。", a: "入ってからの方が", ops: ["入ってからの方が", "入る前より", "入るとすぐ", "入ったばかり"] },
+  { q: "いつも味噌汁のにおい（　　　）。", a: "がしてくる", ops: ["がしてくる", "をしてくる", "がなる", "をなる"] },
+  { q: "この仕事は今日中に（　　　）。", a: "やってしまいたいので", ops: ["やってしまいたいので", "やっていたので", "やっているから", "やるとき"] },
+    { q: "雨が降る(　　　 )、出かけません。", a: "なら", ops: ["なら", "だから", "まで", "だけ"] },
+    { q: "彼は医者に( 　　　)たいと思っています。", a: "なり", ops: ["なる", "なり", "なって", "なった"] },
+    { q: "この問題は私には難し( 　　　)ます。", a: "すぎ", ops: ["すぎ", "すぎる", "すぎて", "すぎだ"] },
+    { q: "時間があれば映画を見に行く(　　　 )です。", a: "つもり", ops: ["つもり", "べき", "はず", "よう"] },
+    { q: "彼は走る( 　　　)が速いです。", a: "の", ops: ["の", "こと", "もの", "は"] },
+    { q: "日本語を勉強し( 　　　)、日本へ行きたいです。", a: "て", ops: ["て", "で", "がら", "たり"] },
+    { q: "明日は雨が降るか( 　　　)分かりません。", a: "どうか", ops: ["どうか", "どう", "かどう", "なにか"] },
+    { q: "このケーキは甘すぎて食べられ(　　　 )。", a: "ません", ops: ["ません", "ない", "ず", "ぬ"] },
+    { q: "彼は宿題をやらない( 　　　)寝てしまった。", a: "で", ops: ["で", "に", "と", "を"] },
+
+    { q: "駅まで歩いて10分(　　　 )かかります。", a: "ぐらい", ops: ["ぐらい", "だけ", "しか", "ほどで"] },
+    { q: "忙しくて昼ご飯を食べる(　　　 )なかった。", a: "暇（ひま）も", ops: ["暇（ひま）も", "ことも", "ものも", "わけも"] },
+    { q: "彼女は歌が上手(　　　 )、ダンスもできます。", a: "なだけでなく", ops: ["なだけでなく", "だけで", "しか", "くらい"] },
+    { q: "この仕事は誰でもできる(　　　 )簡単です。", a: "ほど", ops: ["ほど", "くら", "のに", "だけ"] },
+    { q: "これは私が作ったケーキ(　　　 )。", a: "です", ops: ["です", "だん", "でる", "します"] },
+    { q: "疲れたので少し休む(　　　 )にします。", a: "こと", ops: ["こと", "もの", "の", "わけ"] },
+    { q: "先生がおっしゃった( 　　　)、この問題は難しいです。", a: "とおり", ops: ["とおり", "ように", "みたい", "そう"] },
+    { q: "時間になった(　　　 )、始めましょう。", a: "ので", ops: ["ので", "のに", "でも", "しか"] },
+    { q: "彼は本を読み( 　　　)音楽を聞いています。", a: "ながら", ops: ["ながら", "て", "で", "たり"] },
+    { q: "日本に来てから寿司を食べる( 　　　)好きになりました。", a: "のが", ops: ["のが", "こと", "ものが", "わけが"] },
+
+    { q: "昨日買った本をまだ読んで(　　　 )。", a: "いません", ops: ["いません", "ありません", "ません", "ない"] },
+    { q: "この問題は私には解ける(　　　 )ありません。", a: "わけでは", ops: ["わけでは", "では", "しか", "だけ"] },
+    { q: "彼は来る(　　　 )来ないか分かりません。", a: "か", ops: ["か", "の", "で", "は"] },
+    { q: "そんな危ないことはやめた(　　　 )いいです。", a: "ほうが", ops: ["ほうが", "だけが", "べきが", "ものが"] },
+    { q: "もっと早く来ればよかった(　　　 )思います。", a: "と", ops: ["と", "に", "で", "を"] },
+    { q: "彼は日本語が話せる( 　　　)になりました。", a: "よう", ops: ["よう", "ため", "こと", "まで"] },
+    { q: "この仕事は一人でできる( 　　　)ではありません。", a: "もの", ops: ["もの", "ことが", "ため", "よう"] },
+    { q: "夜遅くまで起きていた(　　　 )、寝坊しました。", a: "ので", ops: ["ので", "のに", "けど", "からで"] },
+    { q: "雨なのに傘を持たないで出かけて(　　　 )。", a: "しまった", ops: ["しまった", "しまう", "しまい", "しまって"] },
+    { q: "この問題は簡単(　　　 )見えますが、実は難しいです。", a: "そうに", ops: ["そうに", "ように", "みたい", "ほどに"] }
+];
+
+let hp = 100;
+let exp = 0;
+let lv = 1;
+let isBgmPlaying = false;
+
+let bossBattle = false;
+let bossStreak = 0;
+
+const bossImage = "BOSS.png";
+const monsterImg = document.getElementById('monster-img');
+const audio = document.getElementById('bgm');
+
+    function startGame() {
+        if(!isBgmPlaying) { audio.play(); isBgmPlaying = true; }
+        loadQuestion();
+    }
+
+    // 新しいモンスターを出す関数
+    function changeMonster() {
+
+    if (bossBattle) {
+        monsterImg.src = bossImage;
+        monsterImg.classList.add('monster-fade-in');
+        return;
+    }
+
+    monsterImg.style.opacity = "0";
+
+    setTimeout(() => {
+        const randomImg =
+            monsterImages[Math.floor(Math.random() * monsterImages.length)];
+
+        monsterImg.src = randomImg;
+
+        monsterImg.classList.remove('monster-fade-in');
+        void monsterImg.offsetWidth;
+        monsterImg.classList.add('monster-fade-in');
+
+        monsterImg.style.opacity = "1";
+    }, 300);
+}
+
+    function loadQuestion() {
+        const qData = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById('text').innerHTML = `<b>【問題】</b><br>${qData.q}`;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        qData.ops.sort(() => Math.random() - 0.5).forEach(op => {
+            const btn = document.createElement('button');
+            btn.innerText = op;
+            btn.onclick = () => checkAnswer(op, qData.a);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+function checkAnswer(selected, correct) {
+
+    const textEl = document.getElementById('text');
+
+    if (selected === correct) {
+
+        monsterImg.style.transform =
+            "translateX(20px) rotate(10deg)";
+
+        setTimeout(() => {
+            monsterImg.style.transform = "translateX(0)";
+        }, 100);
+
+        if (bossBattle) {
+
+            bossStreak++;
+
+            textEl.innerHTML =
+            `<span style='color:#ff0'>
+            魔王にダメージ！
+            <br>
+            ${bossStreak}/5
+            </span>`;
+
+            if (bossStreak >= 5) {
+
+                textEl.innerHTML =
+                `<span style='color:#0f0;font-size:1.3rem'>
+                おめでとう！
+                <br>
+                魔王を倒した！
+                </span>`;
+
+                setTimeout(() => {
+
+                    alert("ゲームクリア！");
+
+                    hp = 100;
+                    exp = 0;
+                    lv = 1;
+
+                    bossBattle = false;
+                    bossStreak = 0;
+
+                    updateStats();
+                    changeMonster();
+                    loadQuestion();
+
+                }, 3000);
+
+                return;
+            }
+
+        } else {
+
+            exp += 50;
+
+            textEl.innerHTML =
+            "<span style='color:#0f0'>正解！ ダメージを与えた！</span>";
+
+            if (exp >= 100) {
+
+                lv++;
+                exp = 0;
+
+                if (lv >= 20) {
+
+                    bossBattle = true;
+                    bossStreak = 0;
+
+                    document.body.style.background = "#300";
+
+                    setTimeout(() => {
+                        document.body.style.background = "#000";
+                    }, 1000);
+
+                    monsterImg.src = bossImage;
+
+                    textEl.innerHTML =
+                    `<span style='color:#f0f;font-size:1.3rem'>
+                    ★ 魔王出現！ ★
+                    <br>
+                    5問連続正解で勝利！
+                    </span>`;
+
+                } else {
+
+                    textEl.innerHTML =
+                    "<span style='color:#ff0'>モンスターを倒した！ 次の敵が現れた！</span>";
+
+                    changeMonster();
+                }
+
+                hp = Math.min(hp + 20, 100);
+            }
+        }
+
+    } else {
+
+        document.body.style.background = "#400";
+
+        setTimeout(() => {
+            document.body.style.background = "#000";
+        }, 200);
+
+        hp -= 20;
+
+        if (bossBattle) {
+
+            bossStreak = 0;
+
+            textEl.innerHTML =
+            "<span style='color:#f00'>魔王の反撃！ 連続正解がリセットされた！</span>";
+
+        } else {
+
+            textEl.innerHTML =
+            "<span style='color:#f00'>ミス！ 20ダメージを受けた！</span>";
+        }
+
+        if (hp <= 0) {
+
+            alert("目の前が真っ暗になった...");
+
+            hp = 100;
+            exp = 0;
+            lv = 1;
+
+            bossBattle = false;
+            bossStreak = 0;
+
+            changeMonster();
+        }
+    }
+
+    updateStats();
+
+    setTimeout(() => {
+
+        if (!(bossBattle && bossStreak >= 5)) {
+            loadQuestion();
+        }
+
+    }, 1200);
+
+
+    }
+
+    function updateStats() {
+        document.getElementById('hp').innerText = hp;
+        document.getElementById('exp').innerText = exp;
+        document.getElementById('lv').innerText = lv;
+    }
+</script>
+</body>
+</html>
