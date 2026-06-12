@@ -40,12 +40,33 @@
 <audio id="bgm" loop>
     <source src="maou_bgm_8bit27.mp3" type="audio/mpeg">
 </audio>
+<audio id="se-hit">
+    <source src="se1.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="se-damage">
+    <source src="se2.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="se-levelup">
+    <source src="se_levelup.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="bgm-boss" loop>
+    <source src="lastboss.mp3" type="audio/mpeg">
+</audio>
 
 <script>
+    
+const seHit = document.getElementById("se-hit");
+const seDamage = document.getElementById("se-damage");
+const seLevel = document.getElementById("se-levelup");
+const bossBgm = document.getElementById("bgm-boss");
+
     // モンスターの画像リスト
     const monsterImages = [
         "oni.png", // 鬼
-        "dragon.jpg", // ドラゴン風
+        "dragon2.png", // ドラゴン風
         "slime-c.png", // スライム風）
         "night[.png" , // 騎士風
         "monnene.jpg" , // モンエネ）
@@ -145,6 +166,10 @@ const audio = document.getElementById('bgm');
 
         exp -= 300;
         lv++;
+        
+    seLevel.currentTime = 0;
+    seLevel.play();
+
 
         // LV20で魔王出現
         if (lv >= 20 && !bossBattle) {
@@ -230,6 +255,12 @@ function checkAnswer(selected, correct) {
         if (bossBattle) {
 
             bossStreak++;
+            
+    // ★BGM切り替え
+    audio.pause();
+    bossBgm.currentTime = 0;
+    bossBgm.play();
+
 
             if (bossStreak >= 5) {
 
@@ -249,6 +280,10 @@ function checkAnswer(selected, correct) {
             <br>
             ${bossStreak}/5
             </span>`;
+            
+    seHit.currentTime = 0;
+    seHit.play();
+
 
         } else {
 
@@ -256,6 +291,10 @@ function checkAnswer(selected, correct) {
 
             textEl.innerHTML =
             "<span style='color:#0f0'>正解！モンスターを倒した！</span>";
+            
+    seHit.currentTime = 0;
+    seHit.play();
+
 
             setTimeout(() => {
                 changeMonster();
@@ -284,6 +323,9 @@ function checkAnswer(selected, correct) {
             </span>`;
 
         } else {
+
+           seDamage.currentTime = 0;
+              seDamage.play();
 
             textEl.innerHTML =
             `<span style='color:#f00'>
