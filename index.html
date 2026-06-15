@@ -37,6 +37,10 @@
     </div>
 </div>
 
+<audio id="bgm-ending" loop>
+    <source src="ending.mp3" type="audio/mpeg">
+</audio>
+
 <audio id="bgm" loop>
     <source src="maou_bgm_8bit27.mp3" type="audio/mpeg">
 </audio>
@@ -53,11 +57,11 @@
 </audio>
 
 <audio id="bgm-boss" loop>
-    <source src="maou_bgm_8bit27.mp3" type="audio/mpeg">
+    <source src="lastboss.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-    
+const endingBgm = document.getElementById("bgm-ending");
 const seHit = document.getElementById("se-hit");
 const seDamage = document.getElementById("se-damage");
 const seLevel = document.getElementById("se-levelup");
@@ -141,6 +145,37 @@ const questions  = [
   { q: "夜になるとカエルの＜なき＞声が聞こえる。", a: "鳴き", ops: ["烏き", "鳥き", "島き", "鳴き"] },
   { q: "久しぶりに＜うんてん＞をしました。", a: "運転", ops: ["軍軽", "運慶", "運転", "軍転"] },
 
+
+  { q: "飼っていた鳥が、にげてしまった。", a: "逃げて", ops: ["速げて", "造げて", "逃げて", "追げて"] },
+  { q: "この店は、日曜日はえいぎょうしていない。", a: "営業", ops: ["栄行", "栄業", "営行", "営業"] },
+  { q: "待ち合わせの時間を（　　　）もらえる？", a: "変えて", ops: ["果えて", "可えて", "変えて", "加えて"] },
+  { q: "さっきの問題は、ふくざつで難しかった。", a: "複雑", ops: ["複稚", "複雑", "復稚", "復雑"] },
+  { q: "まずさいしょに、何をしたらいいですか。", a: "最初", ops: ["再始", "再初", "最始", "最初"] },
+  { q: "この辺りは、夜はとてもしずかです。", a: "静か", ops: ["静か", "情か", "晴か", "清か"] },
+  { q: "事故の原因を調べる。", a: "げんいん", ops: ["ごんいん", "げんいん", "えんいん", "げいいん"] },
+  { q: "どちらにするか迷っている。", a: "まよって", ops: ["こまって", "まいって", "まよって", "はかって"] },
+  { q: "＜恋愛＞小説を読みます。", a: "れんあい", ops: ["れんあい", "へんあい", "こいあい", "れいあい"] },
+  { q: "アルバイトを＜募集＞します。", a: "ぼしゅう", ops: ["おうぼ", "れんしゅう", "ぼしゅう", "しゅうしゅう"] },
+  { q: "夜遅く一人で歩くのは＜危険＞だ。", a: "きけん", ops: ["ぎけん", "きげん", "ぎげん", "きけん"] },
+  { q: "大学で＜環境＞について勉強している。", a: "かんきょう", ops: ["かんぎょう", "がんきょう", "かんきょう", "がんぎょう"] },
+  { q: "家の前に＜畑＞があります。", a: "はたけ", ops: ["はたけ", "いけ", "たんぼ", "こや"] },
+  { q: "迷ったが、＜最後＞には決めた。", a: "けっきょく", ops: ["けっきょく", "ついでに", "せっかく", "そのうち"] },
+  { q: "＜徐々に＞良くなっている。", a: "少しずつ", ops: ["完全に", "かなり", "少しずつ", "ほとんど"] },
+  { q: "＜余計な＞話ばかりしている。", a: "必要ではない", ops: ["楽しい", "必要ではない", "大切な", "大変ではない"] },
+  { q: "交差点の＜先に＞川がある。", a: "向こう", ops: ["正面", "向こう", "手前", "そば"] },
+  { q: "本を電車に＜うっかり＞置いてきた。", a: "注意していなくて", ops: ["負担していなくて", "信用していなくて", "注意していなくて", "忘れていなくて"] },
+  { q: "予約を（　　　）したい。", a: "キャンセル", ops: ["テクニック", "キャンセル", "バーゲン", "セール"] },
+  { q: "大雨の（　　　）で遅れている。", a: "影響", ops: ["非常", "情報", "影響", "指示"] },
+  { q: "係の人に声を（　　　）ください。", a: "かけて", ops: ["出して", "言って", "鳴って", "かけて"] },
+  { q: "野菜や果物を生産している。", a: "農業", ops: ["農業", "工業", "職業", "作業"] },
+  { q: "留学してみて（　　　）自分の国の良さがわかった。", a: "あらためて", ops: ["あらためて", "かえって", "けっして", "あらかじめ"] },
+  { q: "予約の時間を（　　　）する。", a: "変更", ops: ["変化", "変更", "交代", "交換"] },
+  { q: "試験に失敗して（　　　）を受けた。", a: "ショック", ops: ["チャレンジ", "マナー", "ショック", "チェック"] },
+  { q: "（　　　）になって本を読んでいた。", a: "むちゅう", ops: ["しゅうちゅう", "むちゅう", "とうぜん", "りっぱ"] },
+  { q: "部屋の中が（　　　）している。", a: "じめじめ", ops: ["ぽかぽか", "じめじめ", "どんどん", "そろそろ"] },
+  { q: "（　　　）性格で意見を変えない。", a: "がんこな", ops: ["がんこな", "おせっかいな", "まじめな", "クールな"] },
+  { q: "桜の木が（　　　）いた。", a: "咲いて", ops: ["伸びて", "咲いて", "植えて", "進めて"] },
+
 ];
 
 let hp = 100;
@@ -152,8 +187,23 @@ let bossBattle = false;
 let bossStreak = 0;
 
 const bossImage = "BOSS.png";
+const clearEndings = [
+    {
+        img: "ending1.png",
+        text: "魔王を倒して、国が平和になった。キーワード①「まおう」"
+    },
+    {
+        img: "ending2.png",
+        text: "魔王は実は行方不明だったお姫様だった。国に帰ったあと、二人は結婚して幸せに暮らしました。キーワード②「は」"
+    },
+    {
+        img: "ending3.png",
+        text: "魔王を倒したが、勇者はモンエネを飲みすぎて、体調を崩した。キーワード③「おひめさま」"
+    }
+];
 const monsterImg = document.getElementById('monster-img');
 const audio = document.getElementById('bgm');
+
 
     function startGame() {
         if(!isBgmPlaying) { audio.play(); isBgmPlaying = true; }
@@ -172,16 +222,24 @@ const audio = document.getElementById('bgm');
 
 
         // LV20で魔王出現
-        if (lv >= 20 && !bossBattle) {
+if (lv >= 20 && !bossBattle) {
 
-            bossBattle = true;
-            bossStreak = 0;
+    bossBattle = true;
+    bossStreak = 0;
 
-            document.getElementById('text').innerHTML =
-            "<span style='color:#ff0'>★★★★ 魔王出現！ ★★★★<br>5問連続正解で勝利！</span>";
+    document.getElementById('text').innerHTML =
+    "<span style='color:#ff0'>★★★★ 魔王出現！ ★★★★<br>5問連続正解で勝利！</span>";
 
-            changeMonster();
-        }
+    changeMonster();
+}
+
+// ✅ ★ここに追加する！！
+if (bossBattle && bossBgm.paused) {
+    audio.pause();
+    bossBgm.currentTime = 0;
+    bossBgm.play();
+}
+
     }
 
     document.getElementById('hp').innerText = hp;
@@ -257,22 +315,39 @@ function checkAnswer(selected, correct) {
             bossStreak++;
             
     // ★BGM切り替え
+
+
+if (bossStreak >= 5) {
+
+    const ending = clearEndings[Math.floor(Math.random() * clearEndings.length)];
+
+    // ✅ BGM全部停止
     audio.pause();
-    bossBgm.currentTime = 0;
-    bossBgm.play();
+    bossBgm.pause();
 
+    // ✅ エンディングBGM再生
+    endingBgm.currentTime = 0;
+    endingBgm.play();
 
-            if (bossStreak >= 5) {
+    // 画像変更
+    monsterImg.src = ending.img;
+    monsterImg.classList.remove('monster-fade-in');
+    void monsterImg.offsetWidth;
+    monsterImg.classList.add('monster-fade-in');
 
-                textEl.innerHTML =
-                "<span style='color:#ff0'>おめでとう！魔王を倒した！</span>";
+    // メッセージ
+    textEl.innerHTML = `
+    <span style='color:#ff0'>
+    ★★★★★ クリア！ ★★★★★<br>
+    ${ending.text}
+    </span>`;
 
-                setTimeout(() => {
-                    alert("ゲームクリア！");
-                }, 1000);
+    // ボタン変更
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '<button onclick="location.reload()">もう一度遊ぶ</button>';
 
-                return;
-            }
+    return;
+}
 
             textEl.innerHTML =
             `<span style='color:#ff0'>
