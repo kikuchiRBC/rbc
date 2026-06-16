@@ -77,9 +77,12 @@ background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
     <button onclick="startGame('N1')">N1</button>
 </div>
 
-        <div class="options-grid" id="options">
 
     </div>
+
+<audio id="se-heal">
+    <source src="se_kaihuku02.mp3" type="audio/mpeg">
+</audio>
 
     <audio id="bgm-ending" loop>
         <source src="ending.mp3" type="audio/mpeg">
@@ -111,10 +114,11 @@ background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
     const seDamage = document.getElementById("se-damage");
     const seLevel = document.getElementById("se-levelup");
     const bossBgm = document.getElementById("bgm-boss");
+    const seHeal = document.getElementById("se-heal");
     const monsters1 = ["slime-c.png", "oni.png","nezumi.png"];
-    const monsters2 = ["dragon2.png", "night.png","koumori.png"];
-    const monsters3 = ["mimic.png", "moruboru.png","flame.png"];
-    const monsters4 = ["ldog.png", "majisyan.png","dragon.png"];
+    const monsters2 = ["dragonskal.png", "night.png","koumori.png"];
+    const monsters3 = ["mimic.png", "moruboru.png","flame.png","skaldragon.png","majisyan2.png"];
+    const monsters4 = ["ldog.png", "majisyan.png","dragon.png","dragon2.png"];
 
         // モンスターの画像リスト
         const monsterImages = [
@@ -428,7 +432,7 @@ function playHitEffect() {
 
     let bossBattle = false;
     let bossStreak = 0;
-
+    let isPotion = false;
     const bossImage = "BOSS.png";
     const clearEndings = [
         {
@@ -451,25 +455,19 @@ function getMonsterByLevel() {
 
     if (bossBattle) return bossImage;
 
-// ★ レアモンスター（5%）
     if (Math.random() < 0.05) {
+        isPotion = true;   // ★追加
         return "monnene.jpg";
     }
 
+    isPotion = false;      // ★重要
+
     let list;
 
-    if (lv <= 5) {
-        list = monsters1;
-    } 
-    else if (lv <= 10) {
-        list = monsters2;
-    } 
-    else if (lv <= 15) {
-        list = monsters3;
-    } 
-    else {
-        list = monsters4;
-    }
+    if (lv <= 5) list = monsters1;
+    else if (lv <= 10) list = monsters2;
+    else if (lv <= 15) list = monsters3;
+    else list = monsters4;
 
     return list[Math.floor(Math.random() * list.length)];
 }
@@ -610,12 +608,29 @@ else if (currentLevel === "N1") {
 }
 
 
-    function checkAnswer(selected, correct) {
+ function checkAnswer(selected, correct) {
 
-        const textEl = document.getElementById('text');
+    const textEl = document.getElementById('text');
 
-        if (selected === correct) {
-    playHitEffect();
+    // ✅ 正解
+    if (selected === correct) {
+
+        playHitEffect();
+
+        if (isPotion) {
+
+            hp = Math.min(hp + 20, 100);
+
+            textEl.innerHTML =
+            "<span style='color:#0ff'>モンエネを飲んだ！HP回復！</span>";
+
+            seHeal.currentTime = 0;
+            seHeal.play();
+
+            isPotion = false;
+
+        } else {
+
             monsterImg.style.transform =
                 "translateX(20px) rotate(10deg)";
 
@@ -624,125 +639,70 @@ else if (currentLevel === "N1") {
             }, 100);
 
             if (bossBattle) {
-
                 bossStreak++;
-                
-        // ★BGM切り替え
-
-
-    if (bossStreak >= 5) {
-
-        const ending = clearEndings[Math.floor(Math.random() * clearEndings.length)];
-
-        // ✅ BGM全部停止
-        audio.pause();
-        bossBgm.pause();
-
-        // ✅ エンディングBGM再生
-        endingBgm.currentTime = 0;
-        endingBgm.play();
-
-        // 画像変更
-        monsterImg.src = ending.img;
-        monsterImg.classList.remove('monster-fade-in');
-        void monsterImg.offsetWidth;
-        monsterImg.classList.add('monster-fade-in');
-
-        // メッセージ
-        textEl.innerHTML = `
-        <span style='color:#ff0'>
-        ★★★★★ クリア！ ★★★★★<br>
-        ${ending.text}
-        </span>`;
-
-        // ボタン変更
-        const optionsDiv = document.getElementById('options');
-        optionsDiv.innerHTML = '<button onclick="location.reload()">もう一度遊ぶ</button>';
-
-        return;
-    }
-
-                textEl.innerHTML =
-                `<span style='color:#ff0'>
-                魔王にダメージ！
-                <br>
-                ${bossStreak}/5
-                </span>`;
-                
-        seHit.currentTime = 0;
-        seHit.play();
-
-
             } else {
-
                 exp += 50;
-
-                textEl.innerHTML =
-                "<span style='color:#0f0'>正解！モンスターを倒した！</span>";
-                
-        seHit.currentTime = 0;
-        seHit.play();
-
-
-                setTimeout(() => {
-                    changeMonster();
-                }, 500);
             }
 
-        } else {
+            textEl.innerHTML =
+            "<span style='color:#0f0'>正解！</span>";
 
-            document.body.style.background = "#400";
+            seHit.currentTime = 0;
+            seHit.play();
 
             setTimeout(() => {
-                document.body.style.background = "#000";
-            }, 200);
-
-            hp -= 20;
-
-            if (bossBattle) {
-
-                bossStreak = 0;
-
-                textEl.innerHTML =
-                `<span style='color:#f00'>
-                魔王の反撃！
-                <br>
-                正解：${correct}
-                </span>`;
-
-            } else {
-
-            seDamage.currentTime = 0;
-                seDamage.play();
-
-                textEl.innerHTML =
-                `<span style='color:#f00'>
-                ミス！20ダメージ
-                <br>
-                正解：${correct}
-                </span>`;
-            }
-
-            if (hp <= 0) {
-
-                alert("目の前が真っ暗になった...");
-
-                hp = 100;
-                exp = 0;
-                lv = 1;
-                bossBattle = false;
-                bossStreak = 0;
-
                 changeMonster();
-            }
+            }, 500);
         }
 
-        updateStats();
+    // ❌ 不正解
+    } else {
 
-        setTimeout(() => {
-            loadQuestion();
-        }, 1200);
+        // ✅ モンエネなら逃げる
+        if (isPotion) {
+
+            textEl.innerHTML =
+            "<span style='color:#0ff'>モンエネは逃げてしまった！</span>";
+
+            isPotion = false;
+
+            changeMonster();
+
+            setTimeout(() => {
+                loadQuestion();
+            }, 800);
+
+            return;
+        }
+
+        hp -= 20;
+
+        textEl.innerHTML =
+        `<span style='color:#f00'>
+        ミス！<br>
+        正解：${correct}
+        </span>`;
+
+        seDamage.currentTime = 0;
+        seDamage.play();
+
+        if (hp <= 0) {
+            alert("目の前が真っ暗になった...");
+            hp = 100;
+            exp = 0;
+            lv = 1;
+            bossBattle = false;
+            bossStreak = 0;
+            changeMonster();
+        }
     }
+
+    updateStats();
+
+    setTimeout(() => {
+        loadQuestion();
+    }, 1200);
+}
     
     </script>
     </body>
