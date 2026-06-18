@@ -130,6 +130,20 @@ background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
             "moruboru.png","flame.png","koumori.png","nezumi.png",
             "mimic.png","ldog.png","majisyan.png","dragon.png"
         ];
+        
+function startGame(level) {
+    currentLevel = level;
+
+    if (!isBgmPlaying) {
+        audio.play();
+        isBgmPlaying = true;
+    }
+
+    updateMonsterBackground(); // 背景更新
+
+    loadQuestion(); // 問題開始
+}
+
 function updateMonsterBackground() {
 
     if (bossBattle) {
@@ -341,11 +355,11 @@ function playHitEffect() {
 
     const questions3   = [
 { q: "彼の話に耳を＜傾けた＞。", a: "かたむけた", ops: ["あずけた", "さずけた", "かたむけた", "そむけた"] },
-{ q: "紛らわしい言い方はなるべく＜避けた＞ほうがいい。", a: "まぎらわしい", ops: ["こなわらしい", "まぎらわしい", "けがらわしい", "わずらわしい"] },
+{ q: "＜紛らわしい＞言い方はなるべく避けたほうがいい。", a: "まぎらわしい", ops: ["こなわらしい", "まぎらわしい", "けがらわしい", "わずらわしい"] },
 { q: "これから農産物の新しい市場を＜開拓＞する予定です。", a: "かいたく", ops: ["かいちゃく", "かいしゃく", "かいたく", "かいせき"] },
 { q: "この件に関する私の疑問が全て＜解消＞されました。", a: "かいしょう", ops: ["かいしょ", "かいしょう", "けしょ", "けしょう"] },
 { q: "彼は弁護士になるために、寝る間も惜しんで勉学に＜勤しんで＞いる。", a: "いそしんで", ops: ["くやしんで", "はげしんで", "あやしんで", "いそしんで"] },
-{ q: "食物繊維は健康に欠かせない役割を＜担って＞います。", a: "せんい", ops: ["せんい", "せんえい", "せんゆ", "せんゆう"] },
+{ q: "食物＜繊維＞は健康に欠かせない役割を担っています。", a: "せんい", ops: ["せんい", "せんえい", "せんゆ", "せんゆう"] },
 { q: "この時計には（　　　）がありまして、定刻になると歌が流れます。", a: "しかけ", ops: ["しわざ", "しにせ", "しつけ", "しかけ"] },
 { q: "最近ドラマに熱中するあまり、勉強が（　　　）になってしまいました。", a: "おろそか", ops: ["おろそか", "おごそか", "なめらか", "なだらか"] },
 { q: "消費者のニーズを（　　　）ためには、もう少し価格の検討をしなければならない。", a: "満たす", ops: ["満たす", "急がす", "設ける", "授ける"] },
@@ -354,27 +368,24 @@ function playHitEffect() {
 { q: "日々の練習を（　　　）いい結果が出せないのは当たり前のことだ。", a: "おこたっていれば", ops: ["がんばっていれば", "おかしていれば", "おこたっていれば", "かたよっていれば"] },
 { q: "友達の様子を見ると、彼のことは（　　　）嫌いでもないようだ。", a: "まんざら", ops: ["ろくに", "まんざら", "めっきり", "てっきり"] },
 { q: "この企画は画期的な発想から生まれた。", a: "今までにない新しい", ops: ["大勢の人が知っている", "今までにない新しい", "非常に変な", "近頃ではめずらしい"] },
-{ q: "あの女優はつぶらな瞳が印象的だ。", a: "まるくてかわいい", ops: ["きらきらしてかわいい", "ひろくてかわいい", "つぶっていてかわいい", "まるくてかわいい"] },
+{ q: "あの女優は＜つぶらな＞瞳が印象的だ。", a: "まるくてかわいい", ops: ["きらきらしてかわいい", "ひろくてかわいい", "つぶっていてかわいい", "まるくてかわいい"] },
 { q: "猫は、鏡に映る自分の顔を＜つくづく＞と眺めていました。", a: "じっくり", ops: ["こうこうと", "きっちり", "やたらに", "じっくり"] },
 { q: "彼は最も効果的なタイミングを＜見計らって＞いる。", a: "ねらって", ops: ["あおいで", "うながして", "いだいて", "ねらって"] },
-{ q: "彼とはざっくばらんに話ができる。", a: "率直に", ops: ["慎重に", "率直に", "冷静に", "軽率に"] },
+{ q: "彼とは＜ざっくばらん＞に話ができる。", a: "率直に", ops: ["慎重に", "率直に", "冷静に", "軽率に"] },
 { q: "刑事は犯人の残した手掛かりを一つ一つ丹念に調べました。", a: "じっくりと", ops: ["じっくりと", "きっぱりと", "のんびりと", "さっくりと"] },
-{ q: "そのアニメの関連商品の売り上げがどんどん伸びている（　　　）、何か今までのアニメにはなかった魅力があるんだと思います。", a: "ところを見ると", ops: ["ばかりに", "ところを見ると", "おかげで", "あまり"] },
+{ q: "そのアニメの売り上げがどんどん伸びている（　　　）、今までのアニメにはなかった魅力があるんだ。", a: "ところを見ると", ops: ["ばかりに", "ところを見ると", "おかげで", "あまり"] },
 { q: "大切な人を亡くした人々の悲しみは想像（　　　）。", a: "にかたくない", ops: ["にかたくない", "の余地はない", "の限りだ", "に至る"] },
-{ q: "A「昨日のドキュメンタリー番組はどうだった？」 B「うん。芸術家達の生き様を通じて、人生について深く（　　　）よ。」", a: "考えさせられちゃった", ops: ["考えさせられちゃった", "考えされちゃった", "考えられちゃった", "考えさせちゃった"] },
 { q: "妹がいなかったら一人っ子で寂しかっただろう。でも、（　　　）けんかばかりする。", a: "いたらいたで", ops: ["いるならいたので", "いたらいたで", "いるならいたで", "いたらいたので"] },
 { q: "まだ（　　　）そんなに激しい運動をすると、怪我するよ。", a: "若いつもりで", ops: ["若いつもりで", "若いままで", "若げに", "若めに"] },
 
-{ q: "A「どの色のスマートフォンにするか決められましたか。」 B「まだ、迷っています。」 A「（　　　）、いつでもお気軽に近くのスタッフにお申し付けくださいませ。」", a: "お決まりになりましたら", ops: ["お決まりになりましたら", "お決まりをいたしましたら", "お決めいたしましたら", "決めてまいりましたら"] },
 { q: "彼は自分の利益を優先（　　　）、同僚を裏切った。", a: "させることなく", ops: ["させることなく", "させんがために", "させればこそ", "させたが最後"] },
 { q: "大雪で電車が止まってしまって、（　　　）帰れない。", a: "帰ろうにも", ops: ["帰るのはおろか", "帰ろうにも", "帰りながらも", "帰るとはいえ"] },
-{ q: "A「先週の試験、高熱のせいで受けられなかったよ。どうしよう。」 B「仕方ないよ。教授に再試を（　　　）頼んでみたら？」", a: "受けさせてもらえるように", ops: ["受けてもらえるように", "受けさせてあげられるように", "受けさせてもらえるように", "受けてくれるように"] },
 
 { q: "そんな＜貧弱＞な語彙力じゃ、討論なんてできやしないよ。", a: "ひんじゃく", ops: ["びんやく", "びんじゃく", "ひんやく", "ひんじゃく"] },
-{ q: "腰痛予防のために仕事の＜合間＞にストレッチをするようにしている。", a: "ごうかん", ops: ["あいま", "あいかん", "ごうま", "ごうかん"] },
+{ q: "腰痛予防のために仕事の＜合間＞にストレッチをするようにしている。", a: "あいま", ops: ["あいま", "あいかん", "ごうま", "ごうかん"] },
 { q: "言葉の＜変遷＞について調べてみると、昔と今では反対の意味で使われている言葉があることがわかった。", a: "へんせん", ops: ["へんせい", "へんさい", "へんせん", "へんさん"] },
-{ q: "経営難に陥り、事業の縮小を余儀なくされた。", a: "よぎ", ops: ["あまぎ", "よぎ", "しゅくぎ", "よぎ"] },
-{ q: "彼は自分の非を認め深く謝った。", a: "いやしく", ops: ["しつこく", "すばやく", "いやしく", "いさぎよく"] },
+{ q: "経営難に陥り、事業の縮小を＜余儀＞なくされた。", a: "よぎ", ops: ["あまぎ", "よぎ", "しゅくぎ", "よぎ"] },
+{ q: "彼は自分の非を認め＜潔く＞謝った。", a: "いさぎよく", ops: ["しつこく", "すばやく", "いやしく", "いさぎよく"] },
 { q: "彼は事故のショックから心の＜均衡＞を崩してしまった。", a: "きんこう", ops: ["きんこう", "ぎんこう", "きんしょう", "ぎんしょう"] },
 { q: "コーヒーを飲むと頭が（　　　）。", a: "さえる", ops: ["うえる", "さえる", "すえる", "たえる"] },
 { q: "1日に最低でも水分を3リットル以上摂取するのが（　　　）。", a: "のぞましい", ops: ["ふさわしい", "めざましい", "のぞましい", "まちどおしい"] },
@@ -441,7 +452,7 @@ function playHitEffect() {
         },
         {
             img: "ending2.png",
-            text: "魔王は実は行方不明だったお姫様だった。国に帰ったあと、二人は結婚して幸せに暮らしました。キーワード②「は」"
+            text: "魔王は実は行方不明だったお姫様だった。二人は結婚して幸せに暮らしました。キーワード②「は」"
         },
         {
             img: "ending3.png",
@@ -471,16 +482,7 @@ function getMonsterByLevel() {
 
     return list[Math.floor(Math.random() * list.length)];
 }
-function startGame(level) {
-    currentLevel = level;
 
-    if (!isBgmPlaying) {
-        audio.play();
-        isBgmPlaying = true;
-    }
-
-    loadQuestion();
-}
     function updateStats() {
 
     while (exp >= 300) {
@@ -514,20 +516,9 @@ function startGame(level) {
     document.getElementById('exp').innerText = exp;
     document.getElementById('lv').innerText = lv;
 }
-``
+
 //背景
-function startGame(level) {
-    currentLevel = level;
 
-    if (!isBgmPlaying) {
-        audio.play();
-        isBgmPlaying = true;
-    }
-
-    updateMonsterBackground(); // ✅追加
-
-    loadQuestion();
-}
 
     
         // 新しいモンスターを出す関数
@@ -608,7 +599,7 @@ else if (currentLevel === "N1") {
 }
 
 
- function checkAnswer(selected, correct) {
+function checkAnswer(selected, correct) {
 
     const textEl = document.getElementById('text');
 
@@ -617,6 +608,7 @@ else if (currentLevel === "N1") {
 
         playHitEffect();
 
+        // ✅ モンエネ処理
         if (isPotion) {
 
             hp = Math.min(hp + 20, 100);
@@ -631,6 +623,7 @@ else if (currentLevel === "N1") {
 
         } else {
 
+            // ✅ ヒット演出
             monsterImg.style.transform =
                 "translateX(20px) rotate(10deg)";
 
@@ -638,27 +631,68 @@ else if (currentLevel === "N1") {
                 monsterImg.style.transform = "translateX(0)";
             }, 100);
 
+            // ✅ ボス戦
             if (bossBattle) {
-                bossStreak++;
-            } else {
-                exp += 50;
-            }
 
-            textEl.innerHTML =
-            "<span style='color:#0f0'>正解！</span>";
+                bossStreak++;
+
+                // ✅ 5連続でエンディング
+                if (bossStreak >= 5) {
+
+                    const ending = clearEndings[Math.floor(Math.random() * clearEndings.length)];
+
+                    // BGM停止
+                    audio.pause();
+                    bossBgm.pause();
+
+                    // エンディングBGM
+                    endingBgm.currentTime = 0;
+                    endingBgm.play();
+
+                    // 画像
+                    monsterImg.src = ending.img;
+
+                    // メッセージ
+                    textEl.innerHTML = `
+                        <span style='color:#ff0'>
+                        ★★★★★ クリア！ ★★★★★<br>
+                        ${ending.text}
+                        </span>`;
+
+                    // ボタン
+                    document.getElementById("options").innerHTML =
+                        '<button onclick="location.reload()">もう一度遊ぶ</button>';
+
+                    return;
+                }
+
+                // ✅ ボスダメージ表示
+                textEl.innerHTML =
+                `<span style='color:#ff0'>
+                魔王にダメージ！<br>
+                ${bossStreak}/5
+                </span>`;
+
+            } else {
+                // ✅ 通常戦
+                exp += 5000;
+
+                textEl.innerHTML =
+                "<span style='color:#0f0'>正解！モンスター撃破！</span>";
+
+                setTimeout(() => {
+                    changeMonster();
+                }, 500);
+            }
 
             seHit.currentTime = 0;
             seHit.play();
-
-            setTimeout(() => {
-                changeMonster();
-            }, 500);
         }
 
     // ❌ 不正解
     } else {
 
-        // ✅ モンエネなら逃げる
+        // ✅ モンエネ逃げ
         if (isPotion) {
 
             textEl.innerHTML =
@@ -675,24 +709,48 @@ else if (currentLevel === "N1") {
             return;
         }
 
+        // ダメージ演出
+        document.body.style.background = "#400";
+
+        setTimeout(() => {
+            document.body.style.background = "#000";
+        }, 200);
+
         hp -= 20;
 
-        textEl.innerHTML =
-        `<span style='color:#f00'>
-        ミス！<br>
-        正解：${correct}
-        </span>`;
+        if (bossBattle) {
+
+            bossStreak = 0;
+
+            textEl.innerHTML =
+            `<span style='color:#f00'>
+            魔王の反撃！<br>
+            正解：${correct}
+            </span>`;
+
+        } else {
+
+            textEl.innerHTML =
+            `<span style='color:#f00'>
+            ミス！20ダメージ<br>
+            正解：${correct}
+            </span>`;
+        }
 
         seDamage.currentTime = 0;
         seDamage.play();
 
+        // ✅ ゲームオーバー
         if (hp <= 0) {
+
             alert("目の前が真っ暗になった...");
+
             hp = 100;
             exp = 0;
             lv = 1;
             bossBattle = false;
             bossStreak = 0;
+
             changeMonster();
         }
     }
