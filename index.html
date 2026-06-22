@@ -22,7 +22,16 @@
             button:hover { background: #fff; color: #000; }
             #game-container { background-size: cover;background-position: center;}
             
-#area-name {position: absolute;bottom: 10px;right: 10px;font-size: 1rem; color: #ff0;
+#area-name {
+    position: absolute;
+    top: 10px;     /* ←ここをbottom → topに変更 */
+    right: 10px;   /* ←右はそのまま */
+    font-size: 1rem;
+    color: #ff0;
+    background: rgba(0,0,0,1);
+    padding: 5px 10px;
+    border: 1px solid #fff;
+}
 background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
 }
 #monster-area {
@@ -59,11 +68,15 @@ background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
             <span>EXP: <span id="exp">0</span></span>
         </div>
         
-        <div id="monster-area">
-                <div id="hit-effect"></div> 
-            <img id="monster-img" src="monster-3eyes-1024x1024.png" alt="Monster">
-        </div>
-<div id="area-name"></div>
+
+<div id="monster-area">
+    <div id="hit-effect"></div> 
+    <img id="monster-img" src="monster-3eyes-1024x1024.png">
+
+    <div id="area-name"></div>  <!-- ←ここに入れる -->
+</div>
+
+
 <div id="message-window">
     <div id="text">
       冒険が始まる！ <br>レベルを選んでください<br>
