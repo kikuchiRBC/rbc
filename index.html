@@ -14,12 +14,58 @@
     font-size: 0.8rem;
 }
 
+/* モンスター浮遊アニメ */
+
+
+
+.float {
+    animation: float 2s ease-in-out infinite;
+}
+
+/* ダメージ */
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-5px, 0); }
+    50% { transform: translate(5px, 0); }
+    75% { transform: translate(-5px, 0); }
+    100% { transform: translate(0, 0); }
+}
+#monster-wrapper {
+    display: inline-block;
+}
+
+.float {
+    animation: float 2s ease-in-out infinite;
+}
+
+#monster-img {
+    height: 180px;
+}
+
+/* これそのままでOK */
+.shake {
+    animation: shake 0.3s;
+}
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes float {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+
             body { background: #000; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
             #game-container { width: 450px; background: #000; border: 4px solid #fff; padding: 20px; position: relative; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
             .stats { display: flex; justify-content: space-between; font-size: 1.2rem; margin-bottom: 10px; border-bottom: 2px solid #fff; padding-bottom: 5px; }
 #monster-area { height: 200px;display: flex;justify-content: center;align-items: center;margin-bottom: 15px;position: relative;overflow: hidden; background-size: cover;background-position: center;background-repeat: no-repeat;
 }
-           #monster-img { height: 180px; transition: transform 0.3s, opacity 0.3s; }
             .monster-fade-in { animation: slideIn 0.5s ease-out; }
             @keyframes slideIn { from { transform: translateY(-200px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
             #message-window { height: 80px; border: 2px solid #fff; padding: 10px; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; background: rgba(255,255,255,0.05); }
@@ -78,7 +124,11 @@ background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
 <div id="monster-area">
     <div id="hit-effect"></div> 
     
+
+<div id="monster-wrapper" class="float">
     <img id="monster-img" src="monster-3eyes-1024x1024.png">
+</div>
+
 
     <div id="area-name"></div>  <!-- ←ここに入れる -->
 </div>
@@ -178,6 +228,42 @@ function startGame(level) {
     updateMonsterBackground(); // 背景更新
 
     loadQuestion(); // 問題開始
+}
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+
+    const btn = document.getElementById("sound-toggle");
+
+    if (isSoundOn) {
+        btn.innerText = "🔊 SOUND ON";
+
+        audio.muted = false;
+        bossBgm.muted = false;
+        endingBgm.muted = false;
+
+        seHit.muted = false;
+        seDamage.muted = false;
+        seLevel.muted = false;
+        seHeal.muted = false;
+
+    } else {
+        btn.innerText = "🔇 SOUND OFF";
+
+        audio.muted = true;
+        bossBgm.muted = true;
+        endingBgm.muted = true;
+
+        seHit.muted = true;
+        seDamage.muted = true;
+        seLevel.muted = true;
+        seHeal.muted = true;
+    }
+}
+
+function shakeMonster() {
+    monsterImg.classList.remove("shake");
+    void monsterImg.offsetWidth;
+    monsterImg.classList.add("shake");
 }
 
 function updateMonsterBackground() {
@@ -614,6 +700,7 @@ function playHitEffect() {
         }
     ];
     const monsterImg = document.getElementById('monster-img');
+    const monsterWrapper = document.getElementById('monster-wrapper');
     const audio = document.getElementById('bgm');
 
 function getMonsterByLevel() {
@@ -682,6 +769,7 @@ function getMonsterByLevel() {
 
     if (bossBattle) {
         monsterImg.src = bossImage;
+        monsterImg.classList.add("float"); // ✅これ追加
         return;
     }
 
@@ -693,11 +781,14 @@ function getMonsterByLevel() {
 
         monsterImg.src = newMonster;
 
+        monsterImg.classList.remove("float");
+        void monsterImg.offsetWidth; // リセット
+        monsterImg.classList.add("float");
+
         monsterImg.style.opacity = "1";
 
     }, 300);
-}
-        
+}     
 
 function getAreaName() {
 
@@ -761,7 +852,7 @@ function checkAnswer(selected, correct) {
     if (selected === correct) {
 
         playHitEffect();
-
+shakeMonster();
         // ✅ モンエネ処理
         if (isPotion) {
 
@@ -777,13 +868,6 @@ function checkAnswer(selected, correct) {
 
         } else {
 
-            // ✅ ヒット演出
-            monsterImg.style.transform =
-                "translateX(20px) rotate(10deg)";
-
-            setTimeout(() => {
-                monsterImg.style.transform = "translateX(0)";
-            }, 100);
 
             // ✅ ボス戦
             if (bossBattle) {
@@ -829,7 +913,7 @@ function checkAnswer(selected, correct) {
 
             } else {
                 // ✅ 通常戦
-                exp += 50;
+                exp += 5000;
 
                 textEl.innerHTML =
                 "<span style='color:#0f0'>正解！モンスター撃破！</span>";
