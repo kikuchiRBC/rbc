@@ -1,87 +1,119 @@
     <!DOCTYPE html>
     <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>JLPT Monster Hunter: Boss Rush</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+            
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOKEN SEA</title>
+#sound-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+}
 
-    <link rel="stylesheet" href="style.css">
+/* モンスター浮遊アニメ */
+
+
+
+.float {
+    animation: float 2s ease-in-out infinite;
+}
+
+/* ダメージ */
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-5px, 0); }
+    50% { transform: translate(5px, 0); }
+    75% { transform: translate(-5px, 0); }
+    100% { transform: translate(0, 0); }
+}
+#monster-wrapper {
+    display: inline-block;
+}
+
+.float {
+    animation: float 2s ease-in-out infinite;
+}
+
+#monster-img {
+    height: 180px;
+}
+
+/* これそのままでOK */
+.shake {
+    animation: shake 0.3s;
+}
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes float {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+
+            body { background: #000; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+            #game-container { width: 450px; background: #000; border: 4px solid #fff; padding: 20px; position: relative; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+            .stats { display: flex; justify-content: space-between; font-size: 1.2rem; margin-bottom: 10px; border-bottom: 2px solid #fff; padding-bottom: 5px; }
+#monster-area { height: 200px;display: flex;justify-content: center;align-items: center;margin-bottom: 15px;position: relative;overflow: hidden; background-size: cover;background-position: center;background-repeat: no-repeat;
+}
+            .monster-fade-in { animation: slideIn 0.5s ease-out; }
+            @keyframes slideIn { from { transform: translateY(-200px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+            #message-window { height: 80px; border: 2px solid #fff; padding: 10px; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; background: rgba(255,255,255,0.05); }
+            .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            button { background: #000; color: #fff; border: 2px solid #fff; padding: 10px; font-family: 'DotGothic16', sans-serif; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+            button:hover { background: #fff; color: #000; }
+            #game-container { background-size: cover;background-position: center;}
+            
+#area-name {
+    position: absolute;
+    top: 10px;     /* ←ここをbottom → topに変更 */
+    right: 10px;   /* ←右はそのまま */
+    font-size: 1rem;
+    color: #ff0;
+    background: rgba(0,0,0,1);
+    padding: 5px 10px;
+    border: 1px solid #fff;
+}
+background: rgba(0,0,0,1);padding: 5px 10px;border: 1px solid #fff;
+}
+#monster-area {
+    position: relative;
+}
+
+/* 攻撃フラッシュ */
+#hit-effect {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.7);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* アニメーション */
+.hit {
+    animation: flash 0.3s;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+        </style>
     </head>
     <body>
-        <div class="controller">
 
-    <div class="crossKey">
-        <div class="row">
-            <button class="arrowBtn" onclick="movePlayer(0,-1)">↑</button>
-        </div>
-
-        <div class="row">
-            <button class="arrowBtn" onclick="movePlayer(-1,0)">←</button>
-            <button class="arrowBtn" onclick="movePlayer(1,0)">→</button>
-        </div>
-
-        <div class="row">
-            <button class="arrowBtn" onclick="movePlayer(0,1)">↓</button>
-        </div>
-    </div>
-        <div class="actionButtons">
-        <button class="okBtn" onclick="pressOK()">
-            OK
-        </button>
-
-        <button class="cancelBtn" onclick="regenerateMap()">
-            MAPreload
-        </button>
-    </div>
-    </div>
-
-
-
-<div id="titleScreen">
-   <img id="titleLogo" src="img/title.jpg" alt="なかよし海の">
-  
-<button onclick="startGametitle()">
-    ゲームスタート
-</button>
-
-</div>
-
-
-<div id="field-screen" style="display:none;">
-
-<div id="field-status">
-    <span>⭐LV: <span id="field-lv">1</span></span>
-    <span>❤️HP: <span id="field-hp">100</span></span>
-    <span>🐧EXP: <span id="field-exp">0</span></span>
-    <span>🗺️FLOOR: <span id="field-floor">1</span></span>
-</div>
-
-<canvas id="field" width="400" height="400"></canvas>
-
-</div>
-
-
-<!-- ここに追加 -->
-<div id="event-screen" style="display:none;">
-
-    <div id="question-image-area">
-        <img id="event-image" style="max-height:200px;">
-    </div>
-
-    <div id="message-window">
-        <div id="event-text">
-        </div>
-    </div>
-
-</div>
-
-</div>
-
-
-
-
-    <div id="game-container" style="display:none;">
+    <div id="game-container">
         <div class="stats">
             <span>LV: <span id="lv">1</span></span>
             <span>HP: <span id="hp">100</span></span>
@@ -90,61 +122,33 @@
         
 
 <div id="monster-area">
-
     <div id="hit-effect"></div> 
     
 
 <div id="monster-wrapper" class="float">
-    <img id="monster-img" src="start.jpg">
+    <img id="monster-img" src="monster-3eyes-1024x1024.png">
 </div>
- <div id="battleIntro"></div>
+
 
     <div id="area-name"></div>  <!-- ←ここに入れる -->
 </div>
 
 
 <div id="message-window">
-        
-
-    <div id="question-image-area">
-    <img id="question-image" style="display:none;">
-</div>
     <div id="text">
-      冒険が始まる！
+      冒険が始まる！ <br>レベルを選んでください<br>
+        Select your level
     </div>
-    </div>
-<div id="skillButtons">
-
-<button id="healBtn" class="skillBtn" onclick="useHeal()">
-🦦 HEAL(回復)
-</button>
-
-<button id="changeBtn" class="skillBtn" onclick="changeQuestionSkill()">
-🐋 CHANGE（問題変更）
-</button>
-
-<button id="hintBtn"class="skillBtn"  onclick="useHint()">
-🐬 HINT（2択ヒント）
-</button>
-
-
-    </div>
-<button id="iceBtn"class="skillBtn"onclick="useFreezeStorm()"style="display:none;">❄️ FREEZE STORM</button>
-
-<div class="options-grid" id="options" style="display:none;">
-    <button onclick="startGame('N3')"></button>
-    <button onclick="startGame('N2')"></button>
-    <button onclick="startGame('N1')"></button>
-    <button onclick="startGame('N4')"></button>
 </div>
+
+<div class="options-grid" id="options">
+    <button onclick="startGame('N3')">N3</button>
+    <button onclick="startGame('N2')">N2</button>
+    <button onclick="startGame('N1')">N1</button>
 </div>
 
 
-
-
-
-</div>
-
+    </div>
 <button id="sound-toggle" onclick="toggleSound()">🔊 SOUND ON</button>
 <audio id="se-heal">
     <source src="se_kaihuku02.mp3" type="audio/mpeg">
@@ -155,7 +159,7 @@
     </audio>
 
     <audio id="bgm" loop>
-        <source src="maou_bgm_8bit272.mp3" type="audio/mpeg">
+        <source src="maou_bgm_8bit27.mp3" type="audio/mpeg">
     </audio>
     <audio id="se-hit">
         <source src="se1.mp3" type="audio/mpeg">
@@ -173,57 +177,35 @@
         <source src="lastboss.mp3" type="audio/mpeg">
     </audio>
 
-<audio id="bgm-guardian" loop>
- <source src="guardian.mp3" type="audio/mpeg">   
-</audio>
-
-
-    <audio id="bgm-field" loop>
-        <source src="field.mp3" type="audio/mpeg">
-    </audio>
-<audio id="bgm-opening" loop>
-        <source src="opening.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="bgm-win">
-        <source src="win.mp3" type="audio/mpeg">
-</audio>
-<script src="js/questions.js"></script>
-
     <script>
-        
-        let battleWin = false;
     let isSoundOn = true;
-    let eventDone = {};
-    let canHint = false;
     const endingBgm = document.getElementById("bgm-ending");
     const seHit = document.getElementById("se-hit");
     const seDamage = document.getElementById("se-damage");
     const seLevel = document.getElementById("se-levelup");
     const bossBgm = document.getElementById("bgm-boss");
     const seHeal = document.getElementById("se-heal");
-    
-    const guardianBgm =document.getElementById("bgm-guardian");
-    const openingBgm =document.getElementById("bgm-opening");
+    const monsters1 = ["slime-c.png", "oni.png","nezumi.png"];
+    const monsters2 = ["dragonskal.png", "night.png","koumori.png"];
+    const monsters3 = ["mimic.png", "moruboru.png","flame.png","skaldragon.png","majisyan2.png"];
+    const monsters4 = ["ldog.png", "majisyan.png","dragon.png","dragon2.png"];
+function toggleSound() {
+    isSoundOn = !isSoundOn;
 
-    const monsters1 = ["img/monst/araiguma.png","img/monst/bear.png","img/monst/fox.png","img/monst/harinezumi.png", "img/monst/owl.png", "img/monst/rabit.png","img/monst/rishu.png","img/monst/shika.png","img/monst/shimarisu.png","img/monst/sukank.png"];
-    const monsters2 = ["kurage.png","kani.png","kame.png","fugu.png", "oumugai.png", "utsubo.png","shark.png","fugu.png","tako.png","manta.png"];
-    const monsters3 = ["img/monst/scopion.png","img/monst/camel.png","img/monst/fenek.png","img/monst/olix.png",
-                        "img/monst/pancer.png","img/monst/sanhowk.png","img/monst/rezerd.png","img/monst/sandturtle.png","img/monst/snake.png"];
-    const monsters4 = ["img/monst/icerabit.png","img/monst/mogura.png","img/monst/snowbear.png","img/monst/snowcat.png","img/monst/snowfow.png"
-        ,"img/monst/snowowl.png","img/monst/snowpenguin.png","img/monst/snowshika.png","img/monst/snowwolf.png"
-    ];
-     const monsters5 = ["img/monst/dragon.png","img/monst/falcon.png","img/monst/fenix.png","img/monst/gorem.png","img/monst/pison.png","img/monst/spider.png","img/monst/wolf.png"];
+    const btn = document.getElementById("sound-toggle");
 
-const fieldBgm = document.getElementById("bgm-field");
-const battleBgm = document.getElementById("bgm");
-
-const winBgm =
-document.getElementById("bgm-win");
-
-const monsterArea =
-document.getElementById("monster-area");
-
+    if (isSoundOn) {
+        btn.innerText = "🔊 SOUND ON";
+        audio.muted = false;
+        bossBgm.muted = false;
+        endingBgm.muted = false;
+    } else {
+        btn.innerText = "🔇 SOUND OFF";
+        audio.muted = true;
+        bossBgm.muted = true;
+        endingBgm.muted = true;
+    }
+}
         // モンスターの画像リスト
         const monsterImages = [
             "oni.png", // 鬼
@@ -232,688 +214,20 @@ document.getElementById("monster-area");
             "night.png" , // 騎士風
             "monnene.jpg" , // モンエネ）
             "moruboru.png","flame.png","koumori.png","nezumi.png",
-            "mimic.png","ldog.png","majisyan.png","dragon.png","slime-c2.png","kidsdragon.png"
+            "mimic.png","ldog.png","majisyan.png","dragon.png"
         ];
-const monsterNames = {
-
-    // 森
-    "img/monst/araiguma.png":"<ruby>確認<rt>かくにん</rt></ruby>アライグマ",
-    "img/monst/bear.png":"<ruby>後悔<rt>こうかい</rt></ruby>グマ",
-    "img/monst/fox.png":"<ruby>諦<rt>あきら</rt></ruby>めギツネ",
-    "img/monst/harinezumi.png":"<ruby>集中<rt>しゅうちゅう</rt></ruby>ハリネズミ",
-    "img/monst/owl.png":"<ruby>疑<rt>うたが</rt></ruby>いフクロウ",
-    "img/monst/rabit.png":"ためらいうさぎ",
-    "img/monst/rishu.png":"<ruby>心配<rt>しんぱい</rt></ruby>リス",
-    "img/monst/shika.png":"<ruby>勇気<rt>ゆうき</rt></ruby>シカ",
-    "img/monst/shimarisu.png":"<ruby>努力<rt>どりょく</rt></ruby>リス",
-    "img/monst/sukank.png":"かんちガイザー",
-
-    // 海
-    "kurage.png":"<ruby>誘惑<rt>ゆうわく</rt></ruby>ラゲ",
-    "kani.png":"こだわりガニ",
-    "kame.png":"のんびりガメ",
-    "fugu.png":"わくわくフグ",
-    "oumugai.png":"<ruby>迷<rt>まよ</rt></ruby>いガイ",
-    "utsubo.png":"いじっぱりウツボ",
-    "shark.png":"<ruby>恐怖<rt>きょうふ</rt></ruby>シャーク",
-    "tako.png":"<ruby>悩<rt>なや</rt></ruby>みダコ",
-    "manta.png":"おくびょうマンタ",
-
-    // 砂漠
-    "img/monst/scopion.png":"<ruby>不満<rt>ふまん</rt></ruby>サソリ",
-    "img/monst/camel.png":"<ruby>我慢<rt>がまん</rt></ruby>ラクダ",
-    "img/monst/fenek.png":"うたがいフェネック",
-    "img/monst/olix.png":"<ruby>寝坊<rt>ねぼう</rt></ruby>オリックス",
-    "img/monst/pancer.png":"<ruby>無理<rt>むり</rt></ruby>パンサー",
-    "img/monst/sanhowk.png":"<ruby>後悔<rt>こうかい</rt></ruby>ホーク",
-    "img/monst/rezerd.png":"<ruby>強情<rt>ごうじょう</rt></ruby>リザード",
-    "img/monst/sandturtle.png":"のろのろタートル",
-    "img/monst/snake.png":"へりくつヘビ",
-
-    // 雪原
-    "img/monst/icerabit.png":"あきらめウサギ",
-    "img/monst/mogura.png":"ひきこもぐら",
-    "img/monst/snowbear.png":"<ruby>不安<rt>ふあん</rt></ruby>グマ",
-    "img/monst/snowcat.png":"<ruby>気<rt>き</rt></ruby>まぐれキャット",
-    "img/monst/snowowl.png":"<ruby>静<rt>しず</rt></ruby>かフクロウ",
-    "img/monst/snowpenguin.png":"ひかえめペンギン",
-    "img/monst/snowshika.png":"<ruby>弱気<rt>よわき</rt></ruby>シカ",
-    "img/monst/snowwolf.png":"<ruby>孤独<rt>こどく</rt></ruby>ウルフ",
-
-    // 魔界
-    "img/monst/dragon.png":"<ruby>恐怖<rt>きょうふ</rt></ruby>ドラゴン",
-    "img/monst/falcon.png":"<ruby>傲慢<rt>ごうまん</rt></ruby>ファルコン",
-    "img/monst/fenix.png":"<ruby>執念<rt>しゅうねん</rt></ruby>フェニックス",
-    "img/monst/gorem.png":"<ruby>頑固<rt>がんこ</rt></ruby>ゴーレム",
-    "img/monst/pison.png":"<ruby>怒<rt>いか</rt></ruby>りパイソン",
-    "img/monst/spider.png":"<ruby>不安<rt>ふあん</rt></ruby>スパイダー",
-    "img/monst/wolf.png":"<ruby>絶望<rt>ぜつぼう</rt></ruby>ウルフ"
-};
-
-let currentMonsterName = "";
-
-     
-
-let eventMode = false;
-let eventMessages = [];
-let eventIndex = 0;
-let joinFriend = null
-
-let canHeal = false;
-let canChangeQuestion = false;
-
-let startBossAfterEvent = false;
-let openingEvent = false;
-let hasIceSword = false;
-let canFreezeStorm = false;
-    // イベント
- function startGametitle(){
-
-    document.getElementById("titleScreen").style.display = "none";
-
-    openingBgm.currentTime = 0;
-    openingBgm.play();
-
-    openingEvent = true;
-
-startEvent([
-    {
-        img:"img/op1.jpg",
-        text:"ここは、ペンギンたちが<ruby>暮<rt>く</rt></ruby>らす<ruby>平和<rt>へいわ</rt></ruby>な<ruby>町<rt>まち</rt></ruby>「ペンギンむら」。みんながしあわせに<ruby>生活<rt>せいかつ</rt></ruby>していた。"
-    },
-    {
-        img:"img/op2.jpg",
-        text:"しかしある<ruby>日<rt>ひ</rt></ruby>、おそろしい<ruby>魔王<rt>まおう</rt></ruby>があらわれ、ペンギンむらを<ruby>支配<rt>しはい</rt></ruby>してしまった。<ruby>町<rt>まち</rt></ruby>のひとびとは<ruby>苦<rt>くる</rt></ruby>しみ、<ruby>自由<rt>じゆう</rt></ruby>をうばわれてしまった。"
-    },
-    {
-        img:"img/op3.jpg",
-        text:"そのころ、この<ruby>世界<rt>せかい</rt></ruby>には、どんな<ruby>願<rt>ねが</rt></ruby>いもかなえるという<ruby>伝説<rt>でんせつ</rt></ruby>のおさかながいるというウワサがあった。"
-    },
-    {
-        img:"img/op4.jpg",
-        text:"<ruby>町<rt>まち</rt></ruby>を<ruby>魔王<rt>まおう</rt></ruby>の<ruby>支配<rt>しはい</rt></ruby>からすくうため、ペンギンは<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>探<rt>さが</rt></ruby>す<ruby>旅<rt>たび</rt></ruby>に<ruby>出<rt>で</rt></ruby>ることを<ruby>決意<rt>けつい</rt></ruby>した。"
-    },
-    {
-        img:"img/op5.jpg",
-        text:"こうしてペンギンの<ruby>長<rt>なが</rt></ruby>い<ruby>冒険<rt>ぼうけん</rt></ruby>がはじまった。だが、その<ruby>先<rt>さき</rt></ruby>には<ruby>大<rt>おお</rt></ruby>きな<ruby>試練<rt>しれん</rt></ruby>が<ruby>待<rt>ま</rt></ruby>ち<ruby>受<rt>う</rt></ruby>けていることを、まだ<ruby>知<rt>し</rt></ruby>る<ruby>由<rt>よし</rt></ruby>もなかった…。"
-    }
-]);
-}
-function startEvent(messages, friend=null){
-document.querySelector(".crossKey").style.display = "none";
-    eventMode = true;
-document.getElementById("skillButtons").style.display = "none";
-    eventMessages = messages;
-    eventIndex = 0;
-
-    joinFriend = friend;
-
-    document.getElementById("field-screen").style.display = "none";
-    document.getElementById("game-container").style.display = "block";
-
-    document.getElementById("options").style.display = "none";
-
-    showEventMessage();
-
-}
-function showEventMessage(){
-
-    const msg = eventMessages[eventIndex];
-
-    if(openingEvent){
-
-        document.getElementById("monster-img").style.display = "none";
-
-        document.getElementById("monster-area").style.backgroundImage =
-            `url('${msg.img}')`;
-
-    }else{
-
-        document.getElementById("monster-img").style.display = "block";
-        document.getElementById("monster-img").src = msg.img;
-    }
-
-    document.getElementById("text").innerHTML = msg.text;
-}
-
-function closeEvent(){
-
-    eventMode = false;
-
-if(joinFriend && party.length < friendSets.length){
-
-    party.push({
-        x: player.x,
-        y: player.y
-    });
-
-    if(joinFriend === "otter"){
-        canHeal = true;
-    }
-
-    if(joinFriend === "orca"){
-        canChangeQuestion = true;
-    }
-
-if(joinFriend === "dolphin"){
-    canHint = true;
-}
-
-    joinFriend = null;
-}
-
-    // 最終イベント後ならボス戦
-if(startBossAfterEvent){
-
-guardianBgm.pause();
-
-bossBgm.currentTime = 0;
-bossBgm.play();
-
-    startBossAfterEvent = false;
-     inBattle = true; 
-    bossBattle = true;
-    bossStreak = 0;
-
-    canHeal = true;
-    canChangeQuestion = true;
-    canHint = true;
-
-    document.getElementById("field-screen").style.display = "none";
-    document.getElementById("game-container").style.display = "block";
-
-    document.getElementById("skillButtons").style.display = "flex";
-
-    document.getElementById("healBtn").style.display =
-        party.length >= 1 ? "block" : "none";
-
-    document.getElementById("changeBtn").style.display =
-        party.length >= 2 ? "block" : "none";
-
-    document.getElementById("hintBtn").style.display =
-        party.length >= 3 ? "block" : "none";
-
-    document.getElementById("healBtn").disabled = false;
-    document.getElementById("changeBtn").disabled = false;
-    document.getElementById("hintBtn").disabled = false;
-
-    document.getElementById("healBtn").innerHTML = "🦦 回復";
-    document.getElementById("changeBtn").innerHTML = "🐋 問題変更";
-    document.getElementById("hintBtn").innerHTML = "🐬 2択ヒント";
-
-    document.getElementById("options").style.display = "grid";
-
-    loadQuestion();
-
-    return;
-}
-    document.getElementById("options").style.display = "grid";
-    document.getElementById("skillButtons").style.display = "flex"
-document.querySelector(".crossKey").style.display = "flex";
-    document.getElementById("game-container").style.display = "none";
-    document.getElementById("field-screen").style.display = "block";
-    openingEvent = false;
-
-if(openingBgm){
-    openingBgm.pause();
-    openingBgm.currentTime = 0;
-}
-
-document.getElementById("monster-img").style.display = "block";
-
-updateMonsterBackground();
-
-fieldBgm.currentTime = 0;
-fieldBgm.play();
-
-updateFieldStatus();
-
-draw();
-
-
-}
-function getMonsterEvadeRate(){
-
-    if(currentMapIndex < 6){
-        return 0.30; // エリア1 30%
-    }
-    else if(currentMapIndex < 12){
-        return 0.40; // エリア2 40%
-    }
-    else if(currentMapIndex < 18){
-        return 0.50; // エリア3 50%
-    }
-    else if(currentMapIndex < 24){
-        return 0.60; // エリア4 60%
-    }
-    else{
-        return 0.70; // エリア5 70%
-    }
-}
-function getHitRate(){
-
-    const evadeRate = getMonsterEvadeRate();
-
-    let hitRate = 1 - evadeRate + (lv * 0.02);
-
-    if(hitRate > 0.95){
-        hitRate = 0.95;
-    }
-
-    return hitRate;
-}
-function triggerAreaEvent(){
-
-    // 同じイベントを何回も出さない
-    if(eventDone[currentMapIndex]) return;
-
-    switch(currentMapIndex){
-
-        case 6:
-
-            eventDone[currentMapIndex] = true;
-startEvent([
-    {
-        img:"img/otter.png",
-        text:"カワウソ：ペンギン！ そんなにいそいでどこへ<ruby>行<rt>い</rt></ruby>くの？"
-    },
-    {
-        img:"img/penguin.png",
-        text:"ペンギン：<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>探<rt>さが</rt></ruby>しに<ruby>旅<rt>たび</rt></ruby>へ<ruby>行<rt>い</rt></ruby>くんだ。<ruby>魔王<rt>まおう</rt></ruby>に<ruby>支配<rt>しはい</rt></ruby>された<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>うためにね。"
-    },
-    {
-        img:"img/otter.png",
-        text:"カワウソ：そうだったのか！ ぼくも<ruby>町<rt>まち</rt></ruby>のみんなを<ruby>助<rt>たす</rt></ruby>けたい！ いっしょに<ruby>連<rt>つ</rt></ruby>れていってよ！"
-    },
-    {
-        img:"img/penguin.png",
-        text:"ペンギン：もちろん！ <ruby>仲間<rt>なかま</rt></ruby>がいると<ruby>心強<rt>こころづよ</rt></ruby>いよ。"
-    },
-    {
-        img:"img/otter.png",
-        text:"カワウソ：よーし！ みんなのためにがんばるぞ！"
-    },
-    {
-        img:"img/penguin.png",
-        text:"ペンギン・カワウソ：おー！"
-    },
-    {
-        img:"img/otterpenguin.png",
-        text:"♪カワウソが<ruby>仲間<rt>なかま</rt></ruby>になった！"
-    }
-],"otter");
-            break;
-
-        case 12:
-
-            eventDone[currentMapIndex] = true;
-
-           startEvent([
-{
-    img:"img/otter.png",
-    text:"カワウソ：ペンギン、そろそろおなかがすいてきたね。"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：うん…。<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>探<rt>さが</rt></ruby>す<ruby>旅<rt>たび</rt></ruby>は、なかなかたいへんだな。"
-},
-{
-    img:"img/orca.png",
-    text:"シャチ：やあ！ きみたち、どうしたの？"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：ぼくたちは<ruby>魔王<rt>まおう</rt></ruby>に<ruby>支配<rt>しはい</rt></ruby>された<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>うために、<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>探<rt>さが</rt></ruby>しているんだ。"
-},
-{
-    img:"img/orca.png",
-    text:"それはたいへんだね！ まずはこれを<ruby>食<rt>た</rt></ruby>べて<ruby>元気<rt>げんき</rt></ruby>をだしてよ。"
-},
-{
-    img:"img/otter.png",
-    text:"うわー！ おいしそう！"
-},
-{
-    img:"img/penguin.png",
-    text:"ありがとう！ これでまた<ruby>頑張<rt>がんば</rt></ruby>れそうだよ。"
-},
-{
-    img:"img/orca.png",
-    text:"みんなのために<ruby>旅<rt>たび</rt></ruby>をしているなんて、すごいね。"
-},
-{
-    img:"img/orca.png",
-    text:"よかったら、ぼくもいっしょに<ruby>戦<rt>たたか</rt></ruby>わせてくれない？"
-},
-{
-    img:"img/penguin.png",
-    text:"もちろん！ <ruby>仲間<rt>なかま</rt></ruby>がふえるのはとてもうれしいよ！"
-},
-{
-    img:"img/otter.png",
-    text:"これで<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなにもっと<ruby>近<rt>ちか</rt></ruby>づけるね！"
-},
-{
-    img:"img/orca.png",
-    text:"よーし！ みんなで<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>おう！"
-},
-{
-    img:"img/orca.png",
-    text:"♪シャチが<ruby>仲間<rt>なかま</rt></ruby>になった！"
-}
-],"orca");
-
-            break;
-
-        case 18:
-
-            eventDone[currentMapIndex] = true;
-startEvent([
-{
-    img:"img/dolphin.png",
-    text:"イルカ：やあ！ <ruby>君<rt>きみ</rt></ruby>たち、どこへ<ruby>行<rt>い</rt></ruby>くんだい？"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：ぼくたちは<ruby>魔王<rt>まおう</rt></ruby>に<ruby>支配<rt>しはい</rt></ruby>された<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>うために、<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>探<rt>さが</rt></ruby>しているんだ！"
-},
-{
-    img:"img/otter.png",
-    text:"カワウソ：そのおさかなを<ruby>見<rt>み</rt></ruby>つけると、どんな<ruby>願<rt>ねが</rt></ruby>いもかなうって<ruby>言<rt>い</rt></ruby>われているんだよ。"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：<ruby>伝説<rt>でんせつ</rt></ruby>のおさかな！？ それはすごいね！"
-},
-{
-    img:"img/orca.png",
-    text:"シャチ：ぼくたちは、みんなを<ruby>助<rt>たす</rt></ruby>けるために<ruby>旅<rt>たび</rt></ruby>をしているんだ。"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：<ruby>実<rt>じつ</rt></ruby>はぼくも、そのうわさを<ruby>聞<rt>き</rt></ruby>いたことがあるよ。"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：ひとりで<ruby>探<rt>さが</rt></ruby>していたんだけど、なかなか<ruby>見<rt>み</rt></ruby>つからなくてね。"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：それなら、ぼくたちと<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>探<rt>さが</rt></ruby>さない？"
-},
-{
-    img:"img/otter.png",
-    text:"カワウソ：<ruby>仲間<rt>なかま</rt></ruby>が<ruby>増<rt>ふ</rt></ruby>えれば、きっと<ruby>見<rt>み</rt></ruby>つけられるよ！"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：<ruby>本当<rt>ほんとう</rt></ruby>かい！？ ぜひ<ruby>仲間<rt>なかま</rt></ruby>にしてほしい！"
-},
-{
-    img:"img/orca.png",
-    text:"シャチ：もちろんだ！"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：みんなで<ruby>力<rt>ちから</rt></ruby>を<ruby>合<rt>あ</rt></ruby>わせて、<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>おう！"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：よーし！ <ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>見<rt>み</rt></ruby>つけるぞ！"
-},
-{
-    img:"img/dolphin.png",
-    text:"♪イルカが<ruby>仲間<rt>なかま</rt></ruby>になった！"
-}
-],"dolphin");
-            break;
-case 24:
-
-    eventDone[currentMapIndex] = true;
-
-    startEvent([
-    {
-    img:"img/orca.png",
-    text:"シャチ：あれを見て！ <ruby>火山<rt>かざん</rt></ruby>がふんかしている！"
-},
-{
-    img:"img/dolphin.png",
-    text:"イルカ：<ruby>熱気<rt>ねっき</rt></ruby>がすごい…。ぼくたち、ここまで来たんだね。"
-},
-{
-    img:"img/penguin.png",
-    text:"ペンギン：きっと<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなは、この<ruby>先<rt>さき</rt></ruby>にいる！"
-},
-{
-    img:"img/allfriends.png",
-    text:"みんなで<ruby>最後<rt>さいご</rt></ruby>の<ruby>冒険<rt>ぼうけん</rt></ruby>へ！"
-},
-    {
-        img:"img/allfriends.png",
-        text:"みんな：おー！！"
-    }
-    ]);
-
-    break;
-
-
-case 29:
-
-    eventDone[currentMapIndex] = true;
-
-    startBossAfterEvent = true;
-
-//BGM切り替え
-    fieldBgm.pause();
-    battleBgm.pause();
-    bossBgm.pause();
-
-    const guardianBgm =
-    document.getElementById("bgm-guardian");
-
-    guardianBgm.currentTime = 0;
-    guardianBgm.play();
-
-    startEvent([
-    {
-        img:"img/orca.png",
-        text:"シャチ：ん？ みんな、あそこを見て！"
-    },
-    {
-        img:"img/otter.png",
-        text:"カワウソ：どうしたの？"
-    },
-    {
-        img:"img/orca.png",
-        text:"シャチ：あの<ruby>建物<rt>たてもの</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に、だれかがいるよ！"
-    },
-    {
-        img:"img/dolphin.png",
-        text:"イルカ：たしかに…。ぼくたちを<ruby>待<rt>ま</rt></ruby>っているみたいだね。"
-    },
-    {
-        img:"img/penguin.png",
-        text:"ペンギン：もしかして、<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなについて<ruby>知<rt>し</rt></ruby>っているのかな？"
-    },
-    {
-        img:"BOSS.png",
-        text:"ガーディアン：そこで<ruby>止<rt>と</rt></ruby>まれ。私は<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>守<rt>まも</rt></ruby>るガーディアンだ。"
-    },
-    {
-        img:"BOSS.png",
-        text:"これまで<ruby>数多<rt>かずおお</rt></ruby>くの<ruby>冒険者<rt>ぼうけんしゃ</rt></ruby>が、おさかなを<ruby>求<rt>もと</rt></ruby>めてここへやってきた。"
-    },
-    {
-        img:"img/penguin.png",
-        text:"ペンギン：ぼくたちは<ruby>魔王<rt>まおう</rt></ruby>に<ruby>支配<rt>しはい</rt></ruby>された<ruby>町<rt>まち</rt></ruby>を<ruby>救<rt>すく</rt></ruby>うために来たんだ！"
-    },
-    {
-        img:"BOSS.png",
-        text:"ガーディアン：その<ruby>言葉<rt>ことば</rt></ruby>が<ruby>真実<rt>しんじつ</rt></ruby>かどうか、私が<ruby>確<rt>たし</rt></ruby>かめてやろう。"
-    },
-    {
-        img:"guardian.png",
-        text:"<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなを<ruby>手<rt>て</rt></ruby>にする<ruby>資格<rt>しかく</rt></ruby>を<ruby>持<rt>も</rt></ruby>つかどうか、<ruby>試練<rt>しれん</rt></ruby>に<ruby>挑<rt>いど</rt></ruby>むがいい！"
-    },
-    {
-        img:"img/orca.png",
-        text:"シャチ：みんな、<ruby>準備<rt>じゅんび</rt></ruby>はいいか！？"
-    },
-    {
-        img:"img/dolphin.png",
-        text:"イルカ：もちろん！"
-    },
-    {
-        img:"img/otter.png",
-        text:"カワウソ：<ruby>負<rt>ま</rt></ruby>けないぞ！"
-    },
-    {
-        img:"BOSS.png",
-        text:"ガーディアン：さあ、<ruby>君<rt>きみ</rt></ruby>たちの<ruby>力<rt>ちから</rt></ruby>を<ruby>見<rt>み</rt></ruby>せてみろ！"
-    }
-]);
-
-    break;
-    }
-}
-function getIceSword(){
-
-    if(hasIceSword) return;
-
-    hasIceSword = true;
-    canFreezeStorm = true;
-
-    startEvent([
-    {
-        img:"img/ice_temple.jpg",
-        text:"吹雪の中で古代の氷の神殿を発見した。"
-    },
-    {
-        img:"img/ice_sword1.jpg",
-        text:"青く輝く剣が祭壇に刺さっている。"
-    },
-    {
-        img:"img/ice_sword.jpg",
-        text:"ペンギンはアイスソードを抜いた！"
-    },
-    {
-        img:"img/ice_sword2.jpg",
-        text:"❄️ アイスソードを手に入れた！"
-    },
-    {
-        img:"img/ice_sword2.jpg",
-        text:"戦闘中に1回だけ『フリーズストーム』が使えるようになった！"
-    }
-    ]);
-}
+        
 function startGame(level) {
-document.querySelector(".crossKey").style.display = "none";
-document.getElementById("skillButtons").style.display = "none";
-fieldBgm.pause();
+    currentLevel = level;
 
-battleBgm.currentTime = 0;
-battleBgm.play();
+    if (!isBgmPlaying) {
+        audio.play();
+        isBgmPlaying = true;
+    }
 
-    inBattle = true;
+    updateMonsterBackground(); // 背景更新
 
-    document.getElementById("field-screen").style.display = "none";
-    document.getElementById("game-container").style.display = "block";
-    document.getElementById("iceBtn").style.display =
-    hasIceSword ? "block" : "none"; 
-if(hasIceSword){
-
-    document.getElementById("iceBtn").style.display = "block";
-
-    document.getElementById("iceBtn").disabled =
-    !canFreezeStorm;
-
-    document.getElementById("iceBtn").innerHTML =
-    canFreezeStorm
-    ? "❄️ FREEZE STORM"
-    : "❄️ 使用済";
-
-}else{
-
-    document.getElementById("iceBtn").style.display = "none";
-
-}
- currentLevel = level;
-
-
-
-
-
-    updateMonsterBackground();
-showBattleIntro();
-if(party.length >= 1){
-    canHeal = true;
-}
-
-if(party.length >= 2){
-    canChangeQuestion = true;
-}
-if(party.length >= 3){
-    canHint = true;
-}
-
-document.getElementById("healBtn").style.display =
-party.length >= 1 ? "block" : "none";
-
-document.getElementById("changeBtn").style.display =
-party.length >= 2 ? "block" : "none";
-
-document.getElementById("healBtn").innerHTML =
-"🦦 回復";
-
-document.getElementById("healBtn").disabled = false;
-
-document.getElementById("changeBtn").innerHTML =
-"🐋 問題変更";
-
-document.getElementById("changeBtn").disabled = false;
-document.getElementById("hintBtn").style.display =
-party.length >= 3 ? "block" : "none";
-document.getElementById("iceBtn").style.display =
-hasIceSword ? "block" : "none";
-
-document.getElementById("hintBtn").innerHTML =
-"🐬 2択ヒント";
-
-document.getElementById("hintBtn").disabled = false;
-
-
-
-}
-function showBattleIntro(){
-
-    const intro =
-    document.getElementById("battleIntro");
-
-    document.querySelector(".crossKey").style.pointerEvents = "none";
-
-    intro.style.display = "flex";
-
-
-
-intro.innerHTML =
-'<img src="img/battle_start.jpg">'
-
-
- changeMonster();
-setTimeout(()=>{
-
-    intro.style.display = "none";
-
-},1000);   // 画像は1秒で消える
-
-setTimeout(()=>{
-
-    document.querySelector(".crossKey").style.pointerEvents = "auto";
-
-    loadQuestion();
-    document.getElementById("skillButtons").style.display = "flex";
-},3000);   // 問題は2.5秒後に出る
-
+    loadQuestion(); // 問題開始
 }
 function toggleSound() {
     isSoundOn = !isSoundOn;
@@ -922,31 +236,27 @@ function toggleSound() {
 
     if (isSoundOn) {
         btn.innerText = "🔊 SOUND ON";
-         fieldBgm.muted = false;
+
         audio.muted = false;
         bossBgm.muted = false;
         endingBgm.muted = false;
-        openingBgm.muted = false;
+
         seHit.muted = false;
         seDamage.muted = false;
         seLevel.muted = false;
         seHeal.muted = false;
-        guardianBgm.muted = false;
-        
- if(currentMapIndex === 29){guardianBgm.play();}
 
     } else {
         btn.innerText = "🔇 SOUND OFF";
-    fieldBgm.muted = true;
+
         audio.muted = true;
         bossBgm.muted = true;
         endingBgm.muted = true;
-    openingBgm.muted = true;    
+
         seHit.muted = true;
         seDamage.muted = true;
         seLevel.muted = true;
         seHeal.muted = true;
-        guardianBgm.muted = true;
     }
 }
 
@@ -958,39 +268,30 @@ function shakeMonster() {
 
 function updateMonsterBackground() {
 
-    if(bossBattle){
-
-        monsterArea.style.backgroundImage =
-        "url('bg_boss.jpg')";
+    if (bossBattle) {
+        document.getElementById("monster-area").style.backgroundImage =
+            "url('bg_boss.jpg')";
         return;
     }
 
-    if(currentMapIndex < 6){
-
-        monsterArea.style.backgroundImage =
-        "url('bg_forest.jpg')";
+    if (lv <= 5) {
+        document.getElementById("monster-area").style.backgroundImage =
+            "url('bg1.jpg')";
     }
-    else if(currentMapIndex < 12){
-
-        monsterArea.style.backgroundImage =
-        "url('bg_cave.jpg')";
+    else if (lv <= 10) {
+        document.getElementById("monster-area").style.backgroundImage =
+            "url('bg2.png')";
     }
-    else if(currentMapIndex < 18){
-
-        monsterArea.style.backgroundImage =
-        "url('bg1-1.jpg')";
+    else if (lv <= 15) {
+        document.getElementById("monster-area").style.backgroundImage =
+            "url('bg3.jpg')";
     }
-    else if(currentMapIndex < 24){
-
-        monsterArea.style.backgroundImage =
-        "url('bg_snow.jpg')";
-    }
-    else{
-
-        monsterArea.style.backgroundImage =
-        "url('bg_demon.jpg')";
+    else {
+        document.getElementById("monster-area").style.backgroundImage =
+            "url('bg4.png')";
     }
 }
+
 const hitEffect = document.getElementById("hit-effect");
 
 function playHitEffect() {
@@ -999,10 +300,383 @@ function playHitEffect() {
     hitEffect.classList.add("hit");
 }
 
-   
-     
-  let currentLevel = "N2";
+    const questions  = [
+    
+{ q: "子どもと公園で＜あそび＞ました。", a: "遊び", ops: ["逃び", "述び", "運び", "遊び"] },
+{ q: "事故にあった男性は＜じゅうたい＞だそうだ。", a: "重体", ops: ["十代", "重犬", "重体", "十体"] },
+{ q: "今、外にいるんです。＜きたく＞したら、もう一度電話します。", a: "帰宅", ops: ["帰家", "着家", "帰宅", "着宅"] },
+{ q: "＜つめたい＞ジュースを飲んだ。", a: "冷たい", ops: ["冷たい", "凍たい", "寒たい", "涼たい"] },
+{ q: "風邪のときは睡眠と＜えいよう＞をしっかりとってくださいね。", a: "栄養", ops: ["体調", "休養", "栄養", "治療"] },
+{ q: "世界中の人がこのニュースに＜かんしん＞を持っている。", a: "関心", ops: ["関心", "感心", "完心", "観心"] },
+{ q: "工場見学をご（　　　）の方は、私にお知らせください。", a: "希望", ops: ["興味", "期待", "確認", "希望"] },
+{ q: "息子の進学のために、毎月（　　　）している。", a: "貯金", ops: ["貯金", "税金", "現金", "代金"] },
+{ q: "運動（　　　）なので、ジョギングを始めます。", a: "不足", ops: ["不安", "不足", "不良", "不満"] },
+{ q: "昨日、何もしないで早く寝たので、（　　　）元気になった。", a: "すっかり", ops: ["すっかり", "ぐっすり", "はっきり", "ぴったり"] },
+{ q: "新井さんに花の（　　　　）をたくさんもらいました。", a: "種", ops: ["林", "種", "草", "葉"] },
+{ q: "昨日のテストの（　　　）が心配だ。", a: "結果", ops: ["研究", "検査", "調査", "結果"] },
+{ q: "去年の旅行では（　　　）が多くて大変でした。", a: "トラブル", ops: ["ドリブル", "トラブル", "サポート", "サイクル"] },
+{ q: "階段を降りるときに（　　　）らしく、足が痛い。", a: "ひねった", ops: ["ひねった", "ほった", "なでた", "しばった"] },
+{ q: "私の上司は仕事をしながら（　　　）ばかり言っている。", a: "文句", ops: ["会話", "電話", "文句", "笑顔"] },
+{ q: "試合で負けて、とても（　　　）。", a: "くやしい", ops: ["はげしい", "くやしい", "あやしい", "むずかしい"] },
+{ q: "昨日の自動車事故の（　　　）は、エンジンの故障らしい。", a: "原因", ops: ["理解", "説明", "原因", "様子"] },
+{ q: "人気商品だから、売り切れない（　　　）早めに買っておこう。", a: "うちに", ops: ["あいだに", "うちに", "かぎり", "かわりに"] },
+{ q: "エアコンを買い替え（　　　）、1か月の電気代が1500円も安くなった。", a: "たところ", ops: ["たところ", "たてで", "たって", "たばかりの"] },
+{ q: "ミカンは昔から日本にある言葉な（　　　）、なんでカタカナで書くの？", a: "のに", ops: ["から", "ために", "にしては", "のに"] },
+{ q: "この子を助ける（　　　）なら、いくらでも払います。", a: "ため", ops: ["べき", "はず", "ため", "せい"] },
+{ q: "ストーブが（　　　）だったそうよ。", a: "つけっぱなし", ops: ["つけてある", "つけっぱなし", "つけている", "つけておく"] },
+{ q: "いえ、熱（　　　）下がれば、行けると思います。", a: "さえ", ops: ["こそ", "を", "さえ", "も"] },
+{ q: "家庭料理ですが、どうぞ（　　　）。", a: "召し上がってください", ops: ["食べなさい", "いただいてください", "召し上がってください", "お食べになられて"] },
+{ q: "スキー場は外国人（　　　）で、日本じゃないみたいだったよ。", a: "ばかり", ops: ["ばかり", "ほど", "にかぎらず", "をめぐって"] },
+{ q: "テーブルの上に置い（　　　）お弁当、持った？", a: "ておいた", ops: ["て", "てくる", "ている", "ておいた"] },
+{ q: "タバコをやめる（　　　）。", a: "ように言われた", ops: ["ようになっている", "ように感じる", "と言われた", "ように言われた"] },
+{ q: "先生なら黒板の字はもっと大きく（　　　）。", a: "書いてほしいね", ops: ["書いてほしいね", "書くことにするね", "書いてくれないね", "書くわけにはいかないね"] },
+{ q: "コンピューターの会社に＜転職＞します。", a: "てんしょく", ops: ["てんしょく", "てんきん", "しゅうしょく", "しゅうぎょう"] },
+{ q: "今日の＜晩＞ごはんは何にしようか。", a: "ばん", ops: ["よる", "ばん", "ゆう", "ひる"] },
+{ q: "このレストランは夜おそくまで＜営業＞している。", a: "えいぎょう", ops: ["かいぎょう", "えいぎょう", "へいぎょう", "こうぎょう"] },
+{ q: "駅に行くにはこちらの方が＜近道＞ですよ。", a: "ちかみち", ops: ["きんどう", "ちかどう", "きんみち", "ちかみち"] },
+{ q: "彼の長年の努力がやっと世間の人々に＜認め＞られた。", a: "みとめ", ops: ["たしかめ", "ほめ", "みとめ", "もとめ"] },
+{ q: "プラスチックの＜原料＞は石油だ。", a: "げんりょう", ops: ["げんちょう", "ざいりょう", "げんりょう", "ちんりょう"] },
+{ q: "道路が＜渋滞＞していたので遅刻してしまった。", a: "じゅうたい", ops: ["じゅんたい", "じゅうたい", "じゅたい", "じゅうだい"] },
+{ q: "その＜調子＞でがんばりましょう。", a: "ちょうし", ops: ["ちょこ", "ちょし", "ちょうこ", "ちょうし"] },
+{ q: "夫は毎週水曜日に中国文学の研究会に＜かよって＞います。", a: "通って", ops: ["通って", "走って", "使って", "待って"] },
+  { q: "＜きかい＞があったら、いっしょに食事をしましょう。", a: "機会", ops: ["機害", "機外", "機会", "機械"] },
+  { q: "私は勉強中、よく＜あまい＞ものを食べます。", a: "甘い", ops: ["塩い", "苦い", "辛い", "甘い"] },
+  { q: "祖父から家や土地を＜そうぞく＞したけど、その方法は簡単ではなかった。", a: "相続", ops: ["送族", "後続", "相族", "相続"] },
+  { q: "電車がプラットホームに＜つきました＞。", a: "着きました", ops: ["帰きました", "着きました", "届きました", "留きました"] },
+  { q: "戦争のせいであの国の＜けいざい＞は悪化している。", a: "経済", ops: ["経財", "経済", "経在", "経材"] },
 
+  { q: "今回新しくできたワクチンの（　）作用が初めて確認された。", a: "副", ops: ["不", "悪", "反", "副"] },
+  { q: "私たちのクラスは女の子がたくさんいて、男の子は（　）です。", a: "少ない", ops: ["強い", "新しい", "少ない", "古い"] },
+  { q: "山田さんの部屋（　）山が見えます。", a: "から", ops: ["で", "に", "へ", "から"] },
+  { q: "専門家が新しいコンピューターウイルスの（　）を警告しています。", a: "流行", ops: ["発達", "成長", "進歩", "流行"] },
+  { q: "お母さんの（　）にならないようにしなさい。", a: "じゃま", ops: ["たのしみ", "べんり", "じゃま", "ひま"] },
+  { q: "最もいい（　）を示した会社に仕事をお願いします。", a: "条件", ops: ["要件", "一件", "事件", "条件"] },
+  { q: "お湯が（　）いる音がするね。", a: "わいて", ops: ["わいて", "きえて", "おとして", "だして"] },
+  { q: "誕生日のパーティーに（　）された。", a: "招待", ops: ["紹介", "勉強", "招待", "挨拶"] },
+  { q: "彼女はスピーチで事の重大さを何度も（　）した。", a: "強調", ops: ["強力", "強調", "好調", "協調"] },
+  { q: "何かいいアイデアを思い（　）、すぐに紙に書くようにしています。", a: "ついたら", ops: ["はじめたら", "だしたら", "ついたら", "こんだら"] },
+  { q: "開店準備のため内装が予想以上にきれいに（　）。", a: "しあがった", ops: ["しあげた", "しあがった", "しこんだ", "しこめた"] },
+  { q: "消極的な人は気が弱い性格だと誤解されやすい。", a: "しょうきょくてき", ops: ["せいげき", "せいけき", "しょきょく", "しょうきょく"] },
+
+  { q: "その自動車事故の原因は「ながら運転」だという（　）に達した。", a: "結論", ops: ["結論", "結局", "結果", "結構"] },
+  { q: "スポーツは毎日（　）することが大事です。", a: "練習", ops: ["練習", "出席", "予定", "予習"] },
+  { q: "この運動靴は軽くて（　）やすいです。", a: "はき", ops: ["つけ", "かけ", "き", "はき"] },
+  { q: "健康のために（　）食べたほうがいいです。", a: "ほどほどに", ops: ["それから", "あまり", "ちょうど", "ほどほどに"] },
+  { q: "この料理を作るとき、野菜と肉、どちらを先に（　）ますか。", a: "炒め", ops: ["食べ", "燃え", "断り", "炒め"] },
+  { q: "天気がいいと、ここからスカイツリーが（　）見えます。", a: "はっきり", ops: ["ぐっすり", "はっきり", "ぴったり", "たっぷり"] },
+  { q: "昨日の発表は（　）できた。", a: "うまく", ops: ["うまく", "くさく", "激しく", "わるく"] },
+  { q: "夫は旅（　）のトルコから珍しいスカーフを買ってきてくれました。", a: "先", ops: ["手", "外", "先", "地"] },
+  { q: "彼は長年かけてむすこをオリンピック選手に育て（　）。", a: "上げた", ops: ["回った", "受けた", "上げた", "みた"] },
+  { q: "そんなに（　）時間でこの宿題を終わらせることはできません。", a: "短い", ops: ["厳しい", "親しい", "短い", "長い"] },
+  { q: "６時くらいから雨が降るそうだから、かさの（　）をしていったほうがいいと思うよ。", a: "用意", ops: ["用途", "用事", "用件", "用意"] },
+
+  { q: "ちょっと＜いねむり＞しているうちに、降りる駅を行き過ぎてしまった。", a: "居眠り", ops: ["昼眠り", "居眠り", "昼寝り", "居寝り"] },
+  { q: "この高校は部活動が＜さかんな＞ことで有名です。", a: "盛んな", ops: ["豊んな", "盛んな", "勢んな", "強んな"] },
+  { q: "田舎から＜とどいた＞荷物には野菜が入っていた。", a: "届いた", ops: ["着いた", "帰いた", "止いた", "届いた"] },
+  { q: "寒い冬にはやっぱり＜あたたかい＞お茶が一番だ。", a: "温かい", ops: ["暖かい", "温かい", "暑かい", "熱かい"] },
+  { q: "天気予報によると今日は＜さいてい＞気温がマイナス4度まで下がる。", a: "最低", ops: ["最低", "切体", "切低", "最体"] },
+  { q: "長い間準備した試験に不合格になって涙を＜ながした＞。", a: "流した", ops: ["出した", "長した", "流した", "戻した"] },
+  
+  { q: "彼女はその手紙を＜こっそり＞かばんにしまった。", a: "見られないように", ops: ["とられないように", "見られないように", "なくさないように", "忘れないように"] },
+  { q: "昨日の飲み会は本当に＜くだらなかった＞。", a: "つまらなかった", ops: ["たのしかった", "しずかだった", "つまらなかった", "にぎやかだった"] },
+  { q: "彼は＜利口な＞人です。", a: "頭がよい", ops: ["金持ちな", "頭がよい", "自分のことだけを考える", "あまり話さない"] },
+  { q: "来週までに1万字のレポートなんて、本当に＜きつい＞です。", a: "大変だ", ops: ["大変だ", "大事だ", "危険だ", "簡単だ"] },
+  { q: "彼女は歩くのが＜のろい＞。", a: "おそい", ops: ["おそい", "はやい", "すきだ", "きらいだ"] },
+
+  { q: "私は人づきあいが苦手なので＜会合＞などは夫に行ってもらいます。", a: "かいごう", ops: ["かいごう", "かいあい", "あいごう", "あいあい"] },
+  { q: "先生の言ったことが全部＜正しい＞とは言えない。", a: "ただしい", ops: ["さびしい", "かなしい", "ただしい", "おいしい"] },
+  { q: "彼女はかがみに＜映る＞自分を見てびっくりした。", a: "うつる", ops: ["ひかる", "てる", "はる", "うつる"] },
+  { q: "結果も大切だけど＜努力＞したことに意味があるんだよ。", a: "どりょく", ops: ["どうりょく", "どりょく", "きょうりょく", "きょりょく"] },
+  { q: "藤本さんは10年前からソウルで＜暮らして＞います。", a: "くらして", ops: ["くらして", "よらして", "あらして", "もらして"] },
+  { q: "元の書類とその翻訳を＜比べて＞みたら、いくつか間違った表現を見つけた。", a: "くらべて", ops: ["のべて", "すべて", "ならべて", "くらべて"] },
+  { q: "横断歩道を渡ろうとしたら、＜信号＞が赤に変わった。", a: "しんごう", ops: ["しんこう", "しんごう", "しんこ", "しんご"] },
+  { q: "ドルに＜両替＞するため銀行に行ってきます。", a: "りょうがえ", ops: ["りょうかえ", "りょうたい", "りょうがえ", "りょうだい"] },
+
+  { q: "彼は、会社で仕事も（　）スマホばかり見ている。", a: "せずに", ops: ["しても", "せずに", "しなくても", "しようと"] },
+  { q: "私はきゅうりが大嫌いなのに、無理やり友達に（　）。", a: "食べさせられた", ops: ["食べかけられた", "食べさせられた", "食べられた", "食べさせた"] },
+  { q: "きみ、不要なものがないか、箱の中身を確認して（　）かな。", a: "くれない", ops: ["いただかない", "もらわない", "まいらない", "くれない"] },
+  { q: "発表の順番が近づく（　）、緊張してきた。", a: "につれて", ops: ["をはじめ", "につれて", "をとおして", "になって"] },
+  { q: "昨日送った会議の資料は（　）。", a: "ご覧になりましたか", ops: ["ご覧になりましたか", "拝見しましたか", "見てくれませんか", "ご覧くださいませんか"] },
+  { q: "引っ越した（　）のころは、新しい学校に慣れるのに大変でした。", a: "ばかり", ops: ["ところ", "しばらく", "だけ", "ばかり"] },
+  { q: "少々（　）ください。", a: "お待ち", ops: ["待たれて", "お待ち", "お待ちして", "お待たせ"] },
+  { q: "次に人気があるの（　）がまんした。", a: "で", ops: ["も", "に", "で", "を"] },
+    { q: "留学は楽しいこと（　　　）ではない。", a: "ばかり", ops: ["ばかり", "だけ", "ほど", "くらい"] },
+    { q: "仕事に慣れる（　　　）、笑顔でお客様と話せるようになってきた。", a: "にしたがって", ops: ["にしたがって", "あいだに", "ところで", "あとで"] },
+    { q: "三日間降り続けた雨が（　　　）やんだ。", a: "ようやく", ops: ["ようやく", "とつぜん", "すでに", "まもなく"] },
+    { q: "インターネットで買い物をするのは、便利（　　　）怖いこともある。", a: "である一方で", ops: ["である一方で", "なので", "だから", "なら"] },
+    { q: "赤ちゃんは何でも口に（　　　）たがる。", a: "入れ", ops: ["入れ", "出し", "触れ", "取り"] },
+    { q: "ごめんね。約束の時間に（　　　）。", a: "間に合いそうになくて", ops: ["間に合いそうになくて", "間に合ったので", "間に合いながら", "間に合うけれど"] },
+    { q: "危険！池に（　　　）。", a: "入るな", ops: ["入るな", "入ろう", "入れる", "入った"] },
+    { q: "気に入ったものはつい（　　　）。", a: "買ってしまう", ops: ["買ってしまう", "買っている", "買っていた", "買わせる"] },
+    { q: "よく同じ猫が来る。今日（　　　）2回見た。", a: "だけでも", ops: ["だけでも", "しか", "だけ", "ばかり"] },
+    { q: "今日は晴れると言っていたので、傘を（　　　）出かけた。", a: "持たないで", ops: ["持たないで", "持つので", "持ちながら", "持とうと"] },
+    { q: "受験勉強も大変だったが、大学に（　　　）もっと大変だった。", a: "入ってからの方が", ops: ["入ってからの方が", "入る前より", "入るとすぐ", "入ったばかり"] },
+    { q: "いつも味噌汁のにおい（　　　）。", a: "がしてくる", ops: ["がしてくる", "をしてくる", "がなる", "をなる"] },
+    { q: "明日会議があるのでこの仕事は今日中に（　　　）。", a: "やってしまいたい", ops: ["やってしまいたい", "やっていたので", "やっているから", "やるとき"] },
+        { q: "雨が降る(　　　 )、出かけません。", a: "なら", ops: ["なら", "だから", "まで", "だけ"] },
+        { q: "彼は医者に( 　　　)たいと思っています。", a: "なり", ops: ["なる", "なり", "なって", "なった"] },
+        { q: "この問題は私には難し( 　　　)ます。", a: "すぎ", ops: ["すぎ", "すぎる", "すぎて", "すぎだ"] },
+        { q: "時間があれば映画を見に行く(　　　 )です。", a: "つもり", ops: ["つもり", "べき", "はず", "よう"] },
+        { q: "彼は走る( 　　　)が速いです。", a: "の", ops: ["の", "こと", "もの", "は"] },
+        { q: "日本語を勉強し( 　　　)、日本へ行きたいです。", a: "て", ops: ["て", "で", "がら", "たり"] },
+        { q: "明日は雨が降るか( 　　　)分かりません。", a: "どうか", ops: ["どうか", "どう", "かどう", "なにか"] },
+        { q: "このケーキは甘すぎて食べられ(　　　 )。", a: "ません", ops: ["ません", "ないで", "ず", "ぬ"] },
+        { q: "彼は宿題をやらない( 　　　)寝てしまった。", a: "で", ops: ["で", "に", "と", "を"] },
+
+        { q: "駅まで歩いて10分(　　　 )かかります。", a: "ぐらい", ops: ["ぐらい", "だけ", "しか", "ほどで"] },
+        { q: "忙しくて昼ご飯を食べる(　　　 )なかった。", a: "暇（ひま）も", ops: ["暇（ひま）も", "ことも", "ものも", "わけも"] },
+        { q: "彼女は歌が上手(　　　 )、ダンスもできます。", a: "なだけでなく", ops: ["なだけでなく", "だけで", "しか", "くらい"] },
+        { q: "この仕事は誰でもできる(　　　 )簡単です。", a: "ほど", ops: ["ほど", "くら", "のに", "だけ"] },
+        { q: "これは私が作ったケーキ(　　　 )。", a: "です", ops: ["です", "だん", "でる", "します"] },
+        { q: "疲れたので少し休む(　　　 )にします。", a: "こと", ops: ["こと", "もの", "の", "わけ"] },
+        { q: "先生がおっしゃった( 　　　)、この問題は難しいです。", a: "とおり", ops: ["とおり", "ように", "みたい", "そう"] },
+        { q: "時間になった(　　　 )、始めましょう。", a: "ので", ops: ["ので", "のに", "でも", "しか"] },
+        { q: "彼は本を読み( 　　　)音楽を聞いています。", a: "ながら", ops: ["ながら", "て", "で", "たり"] },
+        { q: "日本に来てから寿司を食べる( 　　　)好きになりました。", a: "のが", ops: ["のが", "こと", "ものが", "わけが"] },
+   { q: "あの人はいつも＜親切＞です。", a: "しんせつ", ops: ["せんせい", "しんせい", "せつしん", "しんせつ"] },
+   { q: "＜科学＞の授業が好きです。。", a: "かがく", ops: ["かがく", "ががく", "がかく", "かくが"] },
+        { q: "昨日買った本をまだ読んで(　　　 )。", a: "いません", ops: ["いません", "ありません", "ませんだ", "ないん"] },
+        { q: "この問題は私には解ける(　　　 )ありません。", a: "わけでは", ops: ["わけでは", "では", "しか", "だけ"] },
+        { q: "彼は来る(　　　 )来ないか分かりません。", a: "か", ops: ["か", "の", "で", "は"] },
+        { q: "そんな危ないことはやめた(　　　 )いいです。", a: "ほうが", ops: ["ほうが", "だけが", "べきが", "ものが"] },
+        { q: "もっと早く来ればよかった(　　　 )思います。", a: "と", ops: ["と", "に", "で", "を"] },
+        { q: "彼は日本語が話せる( 　　　)になりました。", a: "よう", ops: ["よう", "ため", "こと", "まで"] },
+        { q: "この仕事は一人でできる( 　　　)ではありません。", a: "もの", ops: ["もの", "ことが", "ため", "よう"] },
+        { q: "夜遅くまで起きていた(　　　 )、寝坊しました。", a: "ので", ops: ["ので", "のに", "けど", "からで"] },
+        { q: "雨なのに傘を持たないで出かけて(　　　 )。", a: "しまった", ops: ["しまった", "しまう", "しまい", "しまって"] },
+        { q: "この問題は簡単(　　　 )見えますが、実は難しいです。", a: "そうに", ops: ["そうに", "ように", "みたい", "ほどに"] },
+        
+    { q: "ほしいけど、＜価格＞がわかりません。", a: "値段（ねだん）", ops: ["機能（きのう）", "中身（なかみ）", "値段（ねだん）", "原因（げんいん）"] },
+    { q: "梅雨の時期は、雨の日が続いて＜うんざり＞する。", a: "いやになる", ops: ["不安になる", "困る", "いやになる", "腹が立つ"] },
+    { q: "弟とけんかになって、＜つい＞叩いてしまった。", a: "思わず", ops: ["かなり", "思わず", "しっかり", "いきなり"] },
+    { q: "箱の中に余ったおかしを＜詰めた＞。", a: "いっぱい入れた", ops: ["いっぱい入れた", "きれいに置いた", "捨てた", "片づけた"] },
+    { q: "＜通勤＞には、１時間くらいかかります。", a: "仕事に行く", ops: ["学校で食べる", "学校に通う", "仕事をする", "仕事に行く"] },
+    { q: "英語のレポートが＜完成＞しました。", a: "できました", ops: ["できました", "書きました", "もらいました", "説明しました"] },
+    { q: "この写真を見て、＜ますます＞そこに行きたくなった。", a: "さらに", ops: ["だいぶ", "すごく", "かなり", "さらに"] },
+    { q: "よく、兄と＜そっくり＞だと言われます。", a: "似ている", ops: ["似ている", "仲がいい", "合わない", "出かける"] },
+    { q: "なにか、もっといい＜方法＞はありませんか。", a: "やり方", ops: ["話し方", "飲み方", "食べ方", "やり方"] },
+    { q: "林さんはいつも＜勝手＞に行動するので、よく部長に注意される。", a: "許可なく", ops: ["突然", "自然に", "不まじめに", "許可なく"] }
+    ,
+    { q: "長い時間スマホを見ていたら、目が＜いたく＞なった。", a: "痛く", ops: ["病く", "痛く", "症く", "疲く"] },
+    { q: "10年後の＜みらい＞は、どうなっているのでしょうか。", a: "未来", ops: ["未来", "来未", "末来", "末末"] },
+    { q: "ここにある飲み物は、＜じゆう＞に飲んでいいです。", a: "自由", ops: ["自申", "白由", "自中", "自由"] },
+    { q: "この店の料理は、味が＜うすい＞。", a: "薄い", ops: ["薄い", "細い", "軽い", "弱い"] },
+    { q: "この書類を田中さんに（　　　）ください。", a: "渡して", ops: ["持して", "渡して", "伝して", "連して"] },
+    { q: "このいすは＜かるい＞ですね。", a: "軽い", ops: ["軽い", "厚い", "短い", "重い"] },
+    { q: "夜になるとカエルの＜なき＞声が聞こえる。", a: "鳴き", ops: ["烏き", "鳥き", "島き", "鳴き"] },
+    { q: "久しぶりに＜うんてん＞をしました。", a: "運転", ops: ["軍軽", "運慶", "運転", "軍転"] },
+
+
+    { q: "飼っていた鳥が、＜にげて＞しまった。", a: "逃げて", ops: ["速げて", "造げて", "逃げて", "追げて"] },
+    { q: "この店は、日曜日は＜えいぎょう＞していない。", a: "営業", ops: ["栄行", "栄業", "営行", "営業"] },
+    { q: "待ち合わせの時間を（　　　）もらえる？", a: "変えて", ops: ["果えて", "可えて", "変えて", "加えて"] },
+    { q: "さっきの問題は、＜ふくざつ＞で難しかった。", a: "複雑", ops: ["複稚", "複雑", "復稚", "復雑"] },
+    { q: "まず＜さいしょ＞に、何をしたらいいですか。", a: "最初", ops: ["再始", "再初", "最始", "最初"] },
+    { q: "この辺りは、夜はとても＜しずか＞です。", a: "静か", ops: ["静か", "情か", "晴か", "清か"] },
+    { q: "事故の＜原因＞を調べる。", a: "げんいん", ops: ["ごんいん", "げんいん", "えんいん", "げいいん"] },
+    { q: "どちらにするか＜迷って＞いる。", a: "まよって", ops: ["こまって", "まいって", "まよって", "はかって"] },
+    { q: "＜恋愛＞小説を読みます。", a: "れんあい", ops: ["れんあい", "へんあい", "こいあい", "れいあい"] },
+    { q: "アルバイトを＜募集＞します。", a: "ぼしゅう", ops: ["おうぼ", "れんしゅう", "ぼしゅう", "しゅうしゅう"] },
+    { q: "夜遅く一人で歩くのは＜危険＞だ。", a: "きけん", ops: ["ぎけん", "きげん", "ぎげん", "きけん"] },
+    { q: "大学で＜環境＞について勉強している。", a: "かんきょう", ops: ["かんぎょう", "がんきょう", "かんきょう", "がんぎょう"] },
+    { q: "家の前に＜畑＞があります。", a: "はたけ", ops: ["はたけ", "いけ", "たんぼ", "こや"] },
+    { q: "迷ったが、＜最後＞には決めた。", a: "けっきょく", ops: ["けっきょく", "ついでに", "せっかく", "そのうち"] },
+    { q: "＜徐々に＞良くなっている。", a: "少しずつ", ops: ["完全に", "かなり", "少しずつ", "ほとんど"] },
+    { q: "＜余計な＞話ばかりしている。", a: "必要ではない", ops: ["楽しい", "必要ではない", "大切な", "大変ではない"] },
+    { q: "交差点の＜先に＞川がある。", a: "向こう", ops: ["正面", "向こう", "手前", "そば"] },
+    { q: "本を電車に＜うっかり＞置いてきた。", a: "注意していなくて", ops: ["負担していなくて", "信用していなくて", "注意していなくて", "忘れていなくて"] },
+    { q: "予約を（　　　）したい。", a: "キャンセル", ops: ["テクニック", "キャンセル", "バーゲン", "セール"] },
+    { q: "大雨の（　　　）で遅れている。", a: "影響", ops: ["非常", "情報", "影響", "指示"] },
+    { q: "係の人に声を（　　　）ください。", a: "かけて", ops: ["出して", "言って", "鳴って", "かけて"] },
+    { q: "野菜や果物を生産している。", a: "農業", ops: ["農業", "工業", "職業", "作業"] },
+    { q: "留学してみて（　　　）自分の国の良さがわかった。", a: "あらためて", ops: ["あらためて", "かえって", "けっして", "あらかじめ"] },
+    { q: "予約の時間を（　　　）する。", a: "変更", ops: ["変化", "変更", "交代", "交換"] },
+    { q: "試験に失敗して（　　　）を受けた。", a: "ショック", ops: ["チャレンジ", "マナー", "ショック", "チェック"] },
+    { q: "（　　　）になって本を読んでいた。", a: "むちゅう", ops: ["しゅうちゅう", "むちゅう", "とうぜん", "りっぱ"] },
+    { q: "部屋の中が（　　　）している。", a: "じめじめ", ops: ["ぽかぽか", "じめじめ", "どんどん", "そろそろ"] },
+    { q: "（　　　）性格で意見を変えない。", a: "がんこな", ops: ["がんこな", "おせっかいな", "まじめな", "クールな"] },
+    { q: "桜の木が（　　　）いた。", a: "咲いて", ops: ["伸びて", "咲いて", "植えて", "進めて"] },
+
+    ];
+     const questions2  = [
+        { q: "この食器は壊れやすいので、丁寧に＜扱って＞ください。",a: "あつかって",ops: ["とって", "ずって", "あつかって", "もって"]},
+        {q: "機械の操作を＜誤る＞と怪我をするから気をつけて下さい。",a: "あやまる",ops: ["まちがえる", "あやまる", "やめる", "なれる"]},
+        {q: "友だちの成功を＜羨んで＞ばかりいないで、お前も頑張ったらどうだ。",a: "うらやんで",ops: ["うらんで", "なやんで", "にくんで", "うらやんで"]},
+        {q: "わが社の商品があの会社の商品より＜劣っている＞とは思えない。",a: "おとっている",ops: ["れっている", "おとっている", "かっている", "さがっている"]},
+        {q: "どうぞ＜率直に＞なんでもおっしゃってください。",a: "そっちょく",ops: ["りっちょく", "そっちょく", "りつちょく", "そっちょく"]},
+        { q: "母は息子を＜ほこり＞に思っている。", a: "誇り", ops: ["尊り", "敬り", "誇り", "守り"] },
+        { q: "花嫁の＜いしょう＞は和服と決まった。", a: "衣装", ops: ["衣装", "服装", "服粧", "衣粧"] },
+        { q: "1年かかってようやく仕事の内容を＜おぼえる＞ことができた。", a: "覚える", ops: ["記える", "覚える", "握える", "学える"] },
+        { q: "家で採れたいちごでジャムを作って瓶に＜つめた＞。", a: "詰めた", ops: ["装めた", "塞めた", "詰めた", "埋めた"] },
+        { q: "おばあさんは10人の孫たちに＜かこまれて＞幸せそうな様子だった。", a: "囲まれて", ops: ["囲まれて", "固まれて", "包まれて", "周まれて"] },
+        { q: "健康な体を保つためには十分な睡眠が（　　　）可欠である。", a: "不", ops: ["無", "未", "不", "非"] },
+        { q: "演奏（　　　）にとって楽器は命の次に大切である。", a: "家", ops: ["様", "生", "家", "人"] },
+        { q: "地球の温暖（　　　）は深刻になりつつある。", a: "化", ops: ["性", "力", "型", "化"] },
+        { q: "この曲はモーツァルトの（　　　）発表の曲で、2012年に発見された。", a: "未", ops: ["未", "非", "無", "不"] },
+        { q: "（　　　）外国の医師たちが集まって「世界医師会議」が開かれた。", a: "諸", ops: ["全", "多", "諸", "緒"] },
+        { q: "彼の昇進の（　　　）には親の力がある。", a: "背景", ops: ["背景", "影響", "評価", "判断"] },
+        { q: "コマーシャルの影響で売り上げが（　　　）。", a: "伸びている", ops: ["張っている", "広がっている", "伝わっている", "伸びている"] },
+        { q: "バスが遅れてなかなか来ないので、私はとても（　　　）した。", a: "いらいら", ops: ["ゆうゆう", "いらいら", "いきいき", "わいわい"] },
+        { q: "あの犬をこの庭から（　　　）くれ。犬は嫌いなんだ。", a: "追い払って", ops: ["追い払って", "追いかけて", "払い込んで", "追い越して"] },
+        { q: "演奏が終わると拍手が（　　　）。", a: "沸き起こった", ops: ["打ち寄せた", "沸き起こった", "充実した", "興奮した"] },
+        { q: "辛いことであったが倒産の事実をしっかり（　　　）。", a: "受け止めた", ops: ["受け止めた", "受け取った", "収めた", "解釈した"] },{ q: "この会社の＜システム＞は他の会社と違ってすべてを社長が決定する。", a: "仕組み", ops: ["事業", "仕組み", "会議", "作法"] },
+        { q: "介護に＜携わっている＞人にインタビューした。", a: "従事している", ops: ["従事している", "関心がある", "手をつないでいる", "持っている"] },
+        { q: "彼の＜何気ない＞一言が彼女を安心させた。", a: "何の意味もない", ops: ["何の意味もない", "親切な気持ちの", "はっきりとした目的のない", "気持ちのよい"] },
+        { q: "話が決まる直前に彼は＜水を差す＞ようなことを言った。", a: "邪魔する", ops: ["強く賛成する", "少し休もうという", "邪魔する", "仲直りする"] },
+        { q: "ちゃんと専門的知識を＜身に付けた＞人でないと、この仕事はできません。", a: "付いている", ops: ["自分で持っている", "着ている", "自分のものにしている", "付いている"] },
+        { q: "言葉の意味を＜文脈＞から考える。", a: "ぶんみゃく", ops: ["ぶんしょう", "ぶんみゃく", "もじ", "もんく"] },
+        { q: "台風によって、大きな＜被害＞を受けた。", a: "ひがい", ops: ["そんがい", "そんかい", "ひがい", "ひかい"] },
+        { q: "環境問題について＜論じる＞。", a: "ろんじる", ops: ["しんじる", "かんじる", "ろんじる", "えんじる"] },
+        { q: "ちょっとかぜ＜気味＞だったので、薬を飲んだ。", a: "ぎみ", ops: ["きみ", "きまい", "ぎみ", "ぎまい"] },
+        { q: "新たな問題が＜生じた＞。", a: "しょうじた", ops: ["しょうじた", "せいじた", "なまじた", "いきじた"] },
+        { q: "選挙に関する新しい＜せいど＞ができた。", a: "制度", ops: ["成度", "制度", "生度", "政度"] },
+        { q: "この植物には＜どく＞があります。", a: "毒", ops: ["香", "枝", "毒", "液"] },
+        { q: "彼女ほど＜せいかく＞のいい人はいない。", a: "性格", ops: ["正確", "正格", "性確", "性格"] },
+        { q: "みんなが＜なっとく＞できるように説明してください。", a: "納得", ops: ["納得", "納徳", "成得", "成徳"] },
+        { q: "この袋、＜やぶれて＞いますから、取りかえてください。", a: "破れて", ops: ["破れて", "割れて", "壊れて", "折れて"] },
+        { q: "成功（　　　）の高い手術だが、それでもやはり不安だ。", a: "率", ops: ["割", "比", "分", "率"] },
+        { q: "彼ならあの大学に合格することは（　　　）可能ではない。", a: "不", ops: ["不", "非", "無", "末"] },
+        { q: "近所で発生した強盗事件の容疑（　　　）は、22歳の若者だそうだ。", a: "者", ops: ["人", "者", "員", "家"] },
+        { q: "（　　　）決勝まで進んだが、残念ながら負けてしまった。", a: "準", ops: ["次", "準", "前", "副"] },
+        { q: "この道をまっすぐ行くと、（　　　）通りに出ますよ。", a: "大", ops: ["広", "主", "大", "太"] },
+        { q: "我が社は、今年ようやく赤字から（　　　）に転換した。", a: "黒字", ops: ["青字", "黒字", "白字", "緑字"] },
+        { q: "（　　　）の習慣を変えることは、なかなか難しい。", a: "長年", ops: ["年月", "月日", "長年", "永遠"] },
+        { q: "彼はいつも（　　　）ばかりいるので、みんなに嫌われている。", a: "いばって", ops: ["したって", "うけもって", "おもいついて", "いばって"] },
+        { q: "彼女の足のけがは（　　　）に回復しています。", a: "順調", ops: ["慎重", "順番", "順調", "重要"] },
+        { q: "先週、ビザを取るための（　　　）をしました。", a: "手続き", ops: ["手当て", "手入れ", "手書き", "手続き"] },
+        { q: "車を運転するときは、（　　　）をよく見てください。", a: "標識", ops: ["横断", "標識", "方面", "通行"] },
+        { q: "彼は会議で自分の意見を＜はっきり＞述べた。", a: "明確に", ops: ["明確に", "適当に", "静かに", "簡単に"] },
+        { q: "予定は急に＜変更＞された。", a: "へんこう", ops: ["へんこう", "へんこうう", "べんこう", "へんごう"] },
+        { q: "この問題は思ったよりも＜複雑＞だ。", a: "ふくざつ", ops: ["ふくざつ", "ふくさつ", "ふくさい", "ふくぜつ"] },
+        { q: "彼の説明はとても＜分かりやすい＞。", a: "理解しやすい", ops: ["理解しやすい", "覚えにくい", "見にくい", "聞きにくい"] },
+        { q: "この辺りは夜になると＜静か＞になります。", a: "しずか", ops: ["しずか", "せいか", "じょうか", "せいじゃ"] },
+        { q: "新しい技術が社会に＜影響＞を与える。", a: "えいきょう", ops: ["えいきょう", "えいごう", "えいぎょう", "えいこう"] },
+        { q: "事故の原因を＜調査＞する。", a: "ちょうさ", ops: ["ちょうさ", "ちょさ", "ちょうざ", "ちょうしゃ"] },
+        { q: "彼は自分の夢を＜実現＞した。", a: "じつげん", ops: ["じつげん", "じつけん", "じつこん", "じっけん"] },
+        { q: "体調が悪くて会社を＜休んだ＞。", a: "やすんだ", ops: ["やすんだ", "やめた", "とめた", "ぬけた"] },
+        { q: "彼は責任を＜果たした＞。", a: "はたした", ops: ["はたした", "こなした", "つくした", "おこなった"] },
+        { q: "努力の結果、試験に＜合格＞した。", a: "ごうかく", ops: ["ごうかく", "こうかく", "ごかく", "こうごう"] },
+        { q: "この仕事は一人では＜無理＞だ。", a: "むり", ops: ["むり", "ぶり", "むい", "むね"] },
+        { q: "彼の意見には＜賛成＞できない。", a: "さんせい", ops: ["さんせい", "ざんせい", "さんぜい", "ざんぜい"] },
+        { q: "計画は順調に＜進んでいる＞。", a: "すすんでいる", ops: ["すすんでいる", "のびている", "ふえている", "あがっている"] },
+        { q: "約束の時間に＜遅れた＞。", a: "おくれた", ops: ["おくれた", "はやまった", "すぎた", "まよった"] },
+        { q: "この機械は操作が＜簡単＞です。", a: "かんたん", ops: ["かんたん", "かんだん", "けんたん", "かんてん"] },
+        { q: "問題を最後まで＜解決＞した。", a: "かいけつ", ops: ["かいけつ", "かいけち", "かいげつ", "かいぜつ"] },
+        { q: "この計画はまだ（　）完成だ。", a: "未", ops: ["未", "不", "無", "木"] },
+        { q: "この説明は（　）十分だ。", a: "不", ops: ["未", "不", "無", "非"] },
+        { q: "彼は（　）責任な発言をした。", a: "無", ops: ["無", "未", "不", "非"] },
+        { q: "（　）料でこのサービスを利用できます。", a: "無", ops: ["無", "未", "不", "非"] },
+        { q: "まだ（　）経験なので、よく分かりません。", a: "未", ops: ["未", "無", "不", "非"] },
+        { q: "彼の説明は（　）意味だ。", a: "無", ops: ["無", "未", "不", "非"] },
+        { q: "その行動は（　）常識だ。", a: "非", ops: ["非", "不", "未", "無"] },
+        { q: "この問題は（　）可能だ。", a: "不", ops: ["不", "未", "無", "非"] },
+        { q: "（　）公式な発表なので、まだ信じられない。", a: "非", ops: ["非", "未", "無", "不"] },
+        { q: "彼は（　）合法な方法でお金を得た。", a: "非", ops: ["非", "不", "未", "無"] },
+];
+
+    const questions3   = [
+{ q: "彼の話に耳を＜傾けた＞。", a: "かたむけた", ops: ["あずけた", "さずけた", "かたむけた", "そむけた"] },
+{ q: "＜紛らわしい＞言い方はなるべく避けたほうがいい。", a: "まぎらわしい", ops: ["こなわらしい", "まぎらわしい", "けがらわしい", "わずらわしい"] },
+{ q: "これから農産物の新しい市場を＜開拓＞する予定です。", a: "かいたく", ops: ["かいちゃく", "かいしゃく", "かいたく", "かいせき"] },
+{ q: "この件に関する私の疑問が全て＜解消＞されました。", a: "かいしょう", ops: ["かいしょ", "かいしょう", "けしょ", "けしょう"] },
+{ q: "彼は弁護士になるために、寝る間も惜しんで勉学に＜勤しんで＞いる。", a: "いそしんで", ops: ["くやしんで", "はげしんで", "あやしんで", "いそしんで"] },
+{ q: "食物＜繊維＞は健康に欠かせない役割を担っています。", a: "せんい", ops: ["せんい", "せんえい", "せんゆ", "せんゆう"] },
+{ q: "この時計には（　　　）がありまして、定刻になると歌が流れます。", a: "しかけ", ops: ["しわざ", "しにせ", "しつけ", "しかけ"] },
+{ q: "最近ドラマに熱中するあまり、勉強が（　　　）になってしまいました。", a: "おろそか", ops: ["おろそか", "おごそか", "なめらか", "なだらか"] },
+{ q: "消費者のニーズを（　　　）ためには、もう少し価格の検討をしなければならない。", a: "満たす", ops: ["満たす", "急がす", "設ける", "授ける"] },
+{ q: "冬の旅行は、洋服が（　　　）荷物が増える。", a: "かさばって", ops: ["かせいて", "かさばって", "かすんで", "かぶれて"] },
+{ q: "待ち望んでいた遠足は雨のせいで（　　　）になりました。", a: "台無し", ops: ["台無し", "不適切", "でたらめ", "うつろ"] },
+{ q: "日々の練習を（　　　）いい結果が出せないのは当たり前のことだ。", a: "おこたっていれば", ops: ["がんばっていれば", "おかしていれば", "おこたっていれば", "かたよっていれば"] },
+{ q: "友達の様子を見ると、彼のことは（　　　）嫌いでもないようだ。", a: "まんざら", ops: ["ろくに", "まんざら", "めっきり", "てっきり"] },
+{ q: "この企画は画期的な発想から生まれた。", a: "今までにない新しい", ops: ["大勢の人が知っている", "今までにない新しい", "非常に変な", "近頃ではめずらしい"] },
+{ q: "あの女優は＜つぶらな＞瞳が印象的だ。", a: "まるくてかわいい", ops: ["きらきらしてかわいい", "ひろくてかわいい", "つぶっていてかわいい", "まるくてかわいい"] },
+{ q: "猫は、鏡に映る自分の顔を＜つくづく＞と眺めていました。", a: "じっくり", ops: ["こうこうと", "きっちり", "やたらに", "じっくり"] },
+{ q: "彼は最も効果的なタイミングを＜見計らって＞いる。", a: "ねらって", ops: ["あおいで", "うながして", "いだいて", "ねらって"] },
+{ q: "彼とは＜ざっくばらん＞に話ができる。", a: "率直に", ops: ["慎重に", "率直に", "冷静に", "軽率に"] },
+{ q: "刑事は犯人の残した手掛かりを一つ一つ丹念に調べました。", a: "じっくりと", ops: ["じっくりと", "きっぱりと", "のんびりと", "さっくりと"] },
+{ q: "そのアニメの売り上げがどんどん伸びている（　　　）、今までのアニメにはなかった魅力があるんだ。", a: "ところを見ると", ops: ["ばかりに", "ところを見ると", "おかげで", "あまり"] },
+{ q: "大切な人を亡くした人々の悲しみは想像（　　　）。", a: "にかたくない", ops: ["にかたくない", "の余地はない", "の限りだ", "に至る"] },
+{ q: "妹がいなかったら一人っ子で寂しかっただろう。でも、（　　　）けんかばかりする。", a: "いたらいたで", ops: ["いるならいたので", "いたらいたで", "いるならいたで", "いたらいたので"] },
+{ q: "まだ（　　　）そんなに激しい運動をすると、怪我するよ。", a: "若いつもりで", ops: ["若いつもりで", "若いままで", "若げに", "若めに"] },
+
+{ q: "彼は自分の利益を優先（　　　）、同僚を裏切った。", a: "させることなく", ops: ["させることなく", "させんがために", "させればこそ", "させたが最後"] },
+{ q: "大雪で電車が止まってしまって、（　　　）帰れない。", a: "帰ろうにも", ops: ["帰るのはおろか", "帰ろうにも", "帰りながらも", "帰るとはいえ"] },
+  { q: "私はこの土地で定職に就き、生活の（　）を築いた。", a: "基盤", ops: ["根拠", "基盤", "根源", "基地"] },
+  { q: "議論は難航すると思ったが、すぐに意見がまとまり、（　）結論が出た。", a: "すんなり", ops: ["すんなり", "うっとり", "ふんわり", "こっそり"] },
+  { q: "さっき駅前で佐藤さんを（　）んですが、今海外にいるはずなのに変ですね。", a: "見かけた", ops: ["見合わせた", "見過ごした", "見かけた", "見違えた"] },
+  { q: "市長の責任ある行動が住民の不安を（　）し、行政に対する期待が一気に高まった。", a: "一掃", ops: ["一掃", "追放", "削除", "排出"] },
+  { q: "十分に煮た野菜は味が（　）柔らかく、とてもおいしかった。", a: "染みて", ops: ["溶けて", "染みて", "潤って", "沈んで"] },
+  { q: "このテーブルは私が子どものころから使っているので、（　）があって捨てられない。", a: "愛着", ops: ["心情", "好感", "熱意", "愛着"] },
+  { q: "現社長は創立者から経営の（　）を学んだ。", a: "ノウハウ", ops: ["データベース", "ベテラン", "ライフワーク", "ノウハウ"] },
+
+  { q: "高橋さんには＜かねがね＞お会いしたいと思っていました。", a: "以前から", ops: ["直接", "ぜひ", "早く", "以前から"] },
+  { q: "林さんはそれを＜故意に＞捨てたらしい。", a: "わざと", ops: ["わざと", "うっかり", "いやいや", "さっさと"] },
+  { q: "昨日、鈴木さんに＜おわびした＞。", a: "謝った", ops: ["文句を言った", "お礼を言った", "断った", "謝った"] },
+  { q: "中村さんの言葉からは強い＜意気込み＞が伝わってくる。", a: "意欲", ops: ["敬意", "自信", "意欲", "信頼"] },
+  { q: "妹は少し＜おびえて＞いるようだった。", a: "怖がって", ops: ["焦って", "怖がって", "悩んで", "悔やんで"] },
+  { q: "私はその一言に＜安堵＞した。", a: "ほっとした", ops: ["ずっとした", "はっとした", "ほっとした", "かっとした"] },
+  { q: "社会活動に参加することで、＜人脈＞を広げることができた。", a: "じんみゃく", ops: ["じんみゃく", "じんまく", "にんみゃく", "にんまく"] },
+  { q: "鈴木さんは指摘がいつも的確で、本当に＜賢い＞人だと思う。", a: "かしこい", ops: ["するどい", "かしこい", "すごい", "えらい"] },
+  { q: "文化の違いが食生活に＜顕著＞に現れている。", a: "けんちょ", ops: ["げんちょ", "けんしょ", "けんちょ", "げんしょ"] },
+  { q: "相談の内容は＜多岐＞にわたった。", a: "たき", ops: ["たき", "たじ", "たぎ", "たし"] },
+  { q: "その風習は、今はもう廃れてしまった。", a: "すたれて", ops: ["くずれて", "かずれて", "つぶれて", "すたれて"] },
+  { q: "家賃の＜相場＞は地域によって違う。", a: "そうば", ops: ["あいば", "そうば", "あいじょう", "そうじょう"] },
+{ q: "そんな＜貧弱＞な語彙力じゃ、討論なんてできやしないよ。", a: "ひんじゃく", ops: ["びんやく", "びんじゃく", "ひんやく", "ひんじゃく"] },
+{ q: "腰痛予防のために仕事の＜合間＞にストレッチをするようにしている。", a: "あいま", ops: ["あいま", "あいかん", "ごうま", "ごうかん"] },
+{ q: "言葉の＜変遷＞について調べてみると、昔と今では反対の意味で使われている言葉があることがわかった。", a: "へんせん", ops: ["へんせい", "へんさい", "へんせん", "へんさん"] },
+{ q: "経営難に陥り、事業の縮小を＜余儀＞なくされた。", a: "よぎ", ops: ["あまぎ", "よぎ", "しゅくぎ", "よぎ"] },
+{ q: "彼は自分の非を認め＜潔く＞謝った。", a: "いさぎよく", ops: ["しつこく", "すばやく", "いやしく", "いさぎよく"] },
+{ q: "彼は事故のショックから心の＜均衡＞を崩してしまった。", a: "きんこう", ops: ["きんこう", "ぎんこう", "きんしょう", "ぎんしょう"] },
+{ q: "コーヒーを飲むと頭が（　　　）。", a: "さえる", ops: ["うえる", "さえる", "すえる", "たえる"] },
+{ q: "1日に最低でも水分を3リットル以上摂取するのが（　　　）。", a: "のぞましい", ops: ["ふさわしい", "めざましい", "のぞましい", "まちどおしい"] },
+{ q: "この部屋は男子ばかりでなんだか（　　　）です。", a: "むさくるしい", ops: ["みすぼらしい", "みぐるしい", "むさくるしい", "はかない"] },
+{ q: "大会の優勝者に（　　　）拍手が送られました。", a: "盛大な", ops: ["雄大な", "旺盛な", "盛大な", "壮絶な"] },
+{ q: "この家は古い木造住宅なので、歩くたびに床が（　　　）うるさいです。", a: "きしんで", ops: ["きずいて", "きたえて", "きしんで", "きざんで"] },
+{ q: "一人異国の地で生活するというのは、（　　　）ものです。", a: "こころぼそい", ops: ["こころぼそい", "うっとうしい", "とぼしい", "なさけない"] },
+{ q: "そんな（　　　）やり方で稼いだ金なんてもらいたくない。", a: "あくどい", ops: ["けちたい", "まぶしい", "あくどい", "はかない"] },
+{ q: "その日は開店前から＜あわただしかった＞。", a: "忙しかった", ops: ["緊張していた", "集中していた", "忙しかった", "落ち着いていた"] },
+{ q: "彼は最後の最後まで＜粘り強く＞戦った。", a: "あきらめずに", ops: ["頑丈に", "あきらめずに", "慎重に", "険しく"] },
+{ q: "彼女は僕にとって＜かけがえのない＞存在だ。", a: "ほかにない", ops: ["やっかいな", "ありがたい", "手ごわい", "ほかにない"] },
+{ q: "今回の市長の決断には本当に＜おそれいった＞。", a: "感心した", ops: ["悲しくなった", "感心した", "うんざりした", "満足した"] },
+{ q: "作品には彼女の＜ユニーク＞な世界観が表現されています。", a: "独特な", ops: ["独特な", "特殊な", "平凡な", "標準的な"] },
+{ q: "大通りに出てみると、週末なのに人通りが＜まばら＞だった。", a: "少なかった", ops: ["絶えていた", "激しかった", "少なかった", "多かった"] },
+{ q: "去年より利益がわずかに増えた。", a: "わずか", ops: ["りし", "りえき", "りえき", "りしゅん"] },
+{ q: "橋本選手の活躍で、なんとかピンチを＜逃れた＞。", a: "のがれた", ops: ["のがれた", "はなれた", "それた", "まぬがれた"] },
+{ q: "子どものおもちゃは、安全性を考慮して選ぶようにしている。", a: "こうりょ", ops: ["こうろ", "こうりょ", "こうろう", "こうりょう"] },
+{ q: "この辺りは視界を＜遮る＞物が何もない。", a: "さえぎる", ops: ["さまたげる", "さえぎる", "せばめる", "へだてる"] },
+{ q: "この説は科学的な＜根拠＞に乏しい。", a: "こんきょ", ops: ["こんしょ", "こんじょ", "こんきょ", "こんぎょ"] },
+{ q: "何事も初めが肝心だ。", a: "かんじん", ops: ["たんしん", "かんしん", "たんじん", "かんじん"] },
+{ q: "この映画は＜画期的な＞手法で製作された。", a: "今までになく新しい", ops: ["広く知られている", "最近ではめずらしい", "非常に時間がかかる", "今までになく新しい"] },
+{ q: "あの企業は海外市場への進出を＜もくろんでいる＞。", a: "計画して", ops: ["計画して", "果たして", "開始して", "あきらめて"] },
+{ q: "問題を解決するために、もう少し＜手がかり＞が欲しい。", a: "ヒント", ops: ["イメージ", "サポート", "チャンス", "ヒント"] },
+{ q: "あの人の話は＜にわかには＞信じられない。", a: "すぐには", ops: ["すぐには", "完全には", "すなおには", "簡単には"] },
+{ q: "この絵は＜重宝＞している。", a: "便利で役に立っている", ops: ["以前より値上がりしている", "形が気に入っている", "評価が高まっている", "便利で役に立っている"] },
+{ q: "中村さんは仕事に対していつも＜シビア＞だ。", a: "厳しい", ops: ["弱気だ", "厳しい", "柔軟だ", "注意深い"] },
+{ q: "物置の隅で、ほこり（　　　）になっている古い人形を見つけた。", a: "まみれ", ops: ["ぐるみ", "がらみ", "まみれ", "ずくめ"] },
+{ q: "木村さんとは共通の趣味があるので、いつも会話が（　　　）。", a: "弾む", ops: ["舞う", "弾む", "転がる", "跳ねる"] },
+{ q: "地域の（　　　）に合った医療のシステムが求められている。", a: "実情", ops: ["実情", "実況", "実権", "実在"] },
+{ q: "その選手は、十年に一人の（　　　）だと言われている。", a: "逸材", ops: ["玄人", "大家", "巨匠", "逸材"] },
+{ q: "書類に（　　　）があった場合、申請は受理されません。", a: "不備", ops: ["不穏", "不当", "不備", "不順"] },
+{ q: "約300年前の絵画の（　　　）が終わり、来月から公開される予定だ。", a: "修復", ops: ["回復", "修復", "復旧", "復興"] },
+{ q: "経済だけでなく、法律にも詳しいのが彼の（　　　）だ。", a: "強み", ops: ["深み", "強み", "高み", "重み"] },
+{ q: "彼の説明は一見もっともらしいが、＜実態＞は全く異なっている。", a: "じったい", ops: ["じつたい", "じったい", "じつだい", "じったいけい"] },
+{ q: "彼は責任を他人に＜転嫁＞しようとした。", a: "てんか", ops: ["てんか", "てんげ", "てんが", "でんか"] },
+{ q: "この問題は単なるミスでは＜済まされない＞。", a: "許されない", ops: ["終わらない", "許されない", "直らない", "認められない"] },
+{ q: "彼の発言は微妙なニュアンスを＜含んでいる＞。", a: "内包している", ops: ["内包している", "排除している", "拡大している", "分解している"] },
+{ q: "長年の努力がついに＜報われた＞。", a: "むくわれた", ops: ["むくわれた", "ほうわれた", "むくえた", "ほうえた"] },
+{ q: "この政策は国民の負担を＜強いる＞ものだ。", a: "しいる", ops: ["しいる", "つよいる", "せまいる", "しめいる"] },
+{ q: "問題はますます＜深刻＞の度合いを増している。", a: "しんこく", ops: ["しんこく", "じんこく", "しんごく", "じんごく"] },
+{ q: "彼女は困難な状況にも＜屈せず＞前進した。", a: "くっせず", ops: ["くっせず", "くつせず", "くっぜず", "くせず"] },
+{ q: "この説は科学的根拠に＜乏しい＞。", a: "とぼしい", ops: ["とぼしい", "まずしい", "すくない", "よわい"] },
+{ q: "彼の態度は周囲の反感を＜招いた＞。", a: "まねいた", ops: ["まねいた", "よびいた", "さそいた", "ひらいた"] },
+{ q: "その決断は将来に大きな影響を＜及ぼす＞だろう。", a: "およぼす", ops: ["およぼす", "およす", "のばす", "ひろめる"] },
+{ q: "組織の不正が次々と＜露呈＞した。", a: "ろてい", ops: ["ろてい", "ろしょう", "ろしゅつ", "ろしょう"] },
+{ q: "彼は周囲の期待に＜背いて＞行動した。", a: "そむいて", ops: ["そむいて", "さからって", "はむかって", "そなえて"] },
+{ q: "状況は楽観視できる段階には＜至っていない＞。", a: "いたっていない", ops: ["いたっていない", "たっしていない", "およんでいない", "すすんでいない"] },
+{ q: "彼の理論にはいくつかの＜矛盾＞が見られる。", a: "むじゅん", ops: ["むじゅん", "ぼうじゅん", "むしょう", "ぼうしょう"] },
+    ];
+    let currentLevel = "N3";
+    let hp = 100;
     let exp = 0;
     let lv = 1;
     let isBgmPlaying = false;
@@ -1010,680 +684,54 @@ function playHitEffect() {
     let bossBattle = false;
     let bossStreak = 0;
     let isPotion = false;
-    
-let endingIndex = 0;
-let endingMode = false;
-
     const bossImage = "BOSS.png";
-const endingScenes = [
-
-{
-    img:"img/ed1.jpg",
-    text:"ガーディアンは<ruby>静<rt>しず</rt></ruby>かにうなずいた。<br><br>『<ruby>君<rt>きみ</rt></ruby>たちは<ruby>試練<rt>しれん</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>えた。』"
-},
-
-{
-    img:"img/ed2.jpg",
-    text:"<ruby>伝説<rt>でんせつ</rt></ruby>のおさかなが<ruby>光<rt>ひかり</rt></ruby>に<ruby>包<rt>つつ</rt></ruby>まれながら<ruby>現<rt>あらわ</rt></ruby>れた。"
-},
-
-{
-    img:"img/ed4.jpg",
-    text:"ペンギンたちは<ruby>願<rt>ねが</rt></ruby>った。<br><br>『みんなの<ruby>笑顔<rt>えがお</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>戻<rt>もど</rt></ruby>してください。』"
-},
-
-{
-    img:"img/ed4.jpg",
-    text:"その<ruby>瞬間<rt>しゅんかん</rt></ruby>、<ruby>世界中<rt>せかいじゅう</rt></ruby>に<ruby>光<rt>ひかり</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby>がった。"
-},
-
-{
-    img:"img/ed4-1.jpg",
-    text:"<ruby>魔王<rt>まおう</rt></ruby>の<ruby>支配<rt>しはい</rt></ruby>は<ruby>終<rt>お</rt></ruby>わり、ペンギンむらに<ruby>平和<rt>へいわ</rt></ruby>が<ruby>戻<rt>もど</rt></ruby>った。"
-},
-
-{
-    img:"img/ed5.jpg",
-    text:"カワウソ、シャチ、イルカ、そしてペンギン<br><br><ruby>仲間<rt>なかま</rt></ruby>たちの<ruby>冒険<rt>ぼうけん</rt></ruby>は<ruby>永遠<rt>えいえん</rt></ruby>に<ruby>語<rt>かた</rt></ruby>り<ruby>継<rt>つ</rt></ruby>がれるだろう。<br><br>"
-},
-{
-    img:"img/ed6.jpg",
-    text:"それからしばらくして――。<br><br>ガーディアンと<ruby>魔王<rt>まおう</rt></ruby>は、ペンギンたちといっしょに<ruby>金平糖屋<rt>こんぺいとうや</rt></ruby>をはじめた。"
-},
-{
-    img:"img/ed7.jpg",
-    text:"お<ruby>店<rt>みせ</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>は『こんぺいとうクエスト』。<br><br><ruby>毎日<rt>まいにち</rt></ruby>たくさんのお<ruby>客<rt>きゃく</rt></ruby>さんでにぎわった。"
-},
-{
-    img:"img/ed8.jpg",
-    text:"<ruby>人気<rt>にんき</rt></ruby>No.1は『ペンギン<ruby>味<rt>あじ</rt></ruby>』。<br><br>さわやかなブルーベリー<ruby>味<rt>あじ</rt></ruby>で、みんなのお<ruby>気<rt>き</rt></ruby>に<ruby>入<rt>い</rt></ruby>りだった。"
-},
-{
-    img:"img/ed9.jpg",
-    text:"『<ruby>魔王味<rt>まおうあじ</rt></ruby>』は<ruby>黒<rt>くろ</rt></ruby>ゴマ。<br><br>こわそうな<ruby>名前<rt>なまえ</rt></ruby>なのに、やさしい<ruby>甘<rt>あま</rt></ruby>さで<ruby>評判<rt>ひょうばん</rt></ruby>になった。"
-},
-{
-    img:"img/ed10.jpg",
-    text:"ガーディアンは『<ruby>伝説<rt>でんせつ</rt></ruby>のしお<ruby>味<rt>あじ</rt></ruby>』を<ruby>作<rt>つく</rt></ruby>った。<br><br>しかし、しょっぱすぎて<ruby>誰<rt>だれ</rt></ruby>も<ruby>買<rt>か</rt></ruby>わなかった。"
-},
-{
-    img:"img/ed11.jpg",
-    text:"カワウソ<ruby>味<rt>あじ</rt></ruby>はキャラメル、イルカ<ruby>味<rt>あじ</rt></ruby>はラムネ、シャチ<ruby>味<rt>あじ</rt></ruby>はコーラ。<br><br>みんなで<ruby>新商品<rt>しんしょうひん</rt></ruby>を<ruby>考<rt>かんが</rt></ruby>えるのが<ruby>楽<rt>たの</rt></ruby>しみだった。"
-},
-{
-    img:"img/ed13.jpg",
-    text:"こうして、かつての<ruby>敵<rt>てき</rt></ruby>も<ruby>味方<rt>みかた</rt></ruby>もみんななかよくくらした。<br><br>ペンギンむらでいちばん<ruby>人気<rt>にんき</rt></ruby>の<ruby>金平糖屋<rt>こんぺいとうや</rt></ruby>として――。"
-},
-{
-    img:"img/ed14.jpg",
-    text:"『さあ、<ruby>今日<rt>きょう</rt></ruby>もこんぺいとうをつくるぞー！』<br><br>みんなの<ruby>笑<rt>わら</rt></ruby>い<ruby>声<rt>ごえ</rt></ruby>は、いつまでもひびきつづけた。<br><br>★★★★ HAPPY END ★★★★"
-}
-];
-
+    const clearEndings = [
+        {
+            img: "ending1.png",
+            text: "魔王を倒して、国が平和になった。キーワード①「まおう」"
+        },
+        {
+            img: "ending2.png",
+            text: "魔王は実は行方不明だったお姫様だった。二人は結婚して幸せに暮らしました。キーワード②「は」"
+        },
+        {
+            img: "ending3.png",
+            text: "魔王を倒したが、勇者はモンエネを飲みすぎて、体調を崩した。キーワード③「おひめさま」"
+        }
+    ];
     const monsterImg = document.getElementById('monster-img');
     const monsterWrapper = document.getElementById('monster-wrapper');
     const audio = document.getElementById('bgm');
-let party = [];
-
-function loadImage(src){
-    const img = new Image();
-    img.src = src;
-    return img;
-}
-const friendSets = [
-
-    {
-        left: loadImage("img/hero1_left.png"),
-        right: loadImage("img/hero1_right.png"),
-        up: loadImage("img/hero1_up.png"),
-        down: loadImage("img/hero1_down.png")
-    },
-
-    {
-        left: loadImage("img/hero2_left.png"),
-        right: loadImage("img/hero2_right.png"),
-        up: loadImage("img/hero2_up.png"),
-        down: loadImage("img/hero2_down.png")
-    },
-
-    {
-        left: loadImage("img/hero3_left.png"),
-        right: loadImage("img/hero3_right.png"),
-        up: loadImage("img/hero3_up.png"),
-        down: loadImage("img/hero3_down.png")
-    },
-
-    {
-        left: loadImage("img/dolphin_left.png"),
-        right: loadImage("img/dolphin_right.png"),
-        up: loadImage("img/dolphin_up.png"),
-        down: loadImage("img/dolphin_down.png")
-    }
-];
-const player = {
-    x: 2,
-    y: 2
-};
-
-let hp = 100;
-let inBattle = false;
-
-const grassImg = new Image();
-grassImg.src = "img/grass.png";
-
-const wallImg = new Image();
-wallImg.src = "img/wall.png";
-
-
-const treeImg = new Image();
-treeImg.src = "img/tree.png";
-
-const houseImg = new Image();
-houseImg.src = "img/house.png";
-
-
-const heroImg = new Image();
-heroImg.src = "img/hero.png";
-
-
-const stairsImg = new Image();
-stairsImg.src = "img/stairs.png";
-
-
-const bonusImg = new Image();
-bonusImg.src = "img/bonus.png";
-
-const riverImg = new Image();
-riverImg.src = "img/river.png";
-
-const innImg = new Image();
-innImg.src = "img/inn.png";
-
-
-
-const canvas = document.getElementById("field");
-const ctx = canvas.getContext("2d");
-
-
-const tileSize = 32;
-let direction = "left"
-
-
-
-const maps = [];
-
-for(let i=0;i<30;i++){
-    maps.push(generateMap(i));
-}
-
-function startEnding(){
-
-    endingMode = true;
-    endingIndex = 0;
-
-    showEndingScene();
-}
-function showEndingScene(){
-
-    const scene = endingScenes[endingIndex];
-
-    monsterImg.style.display = "none";
-
-    monsterArea.style.backgroundImage =
-        `url('${scene.img}')`;
-
-    monsterArea.style.backgroundSize = "cover";
-    monsterArea.style.backgroundPosition = "center";
-
-    document.getElementById("text").innerHTML =
-        scene.text;
-
-    document.getElementById("options").innerHTML =
-        "";
-}
-function nextEnding(){
-
-    endingIndex++;
-
-    if(endingIndex >= endingScenes.length){
-
-        document.getElementById("text").innerHTML =
-        "ありがとうございました！";
-
-        document.getElementById("options").innerHTML =
-        "<button onclick='location.reload()'>もう一度遊ぶ</button>";
-
-        return;
-    }
-
-    showEndingScene();
-}
-function generateMap(index){
-
-    const rows = 13;
-    const cols = 13;
-
-    const map = [];
-
-    for(let y=0;y<rows;y++){
-
-        map[y] = [];
-
-        for(let x=0;x<cols;x++){
-
-            if(
-                y===0 ||
-                y===rows-1 ||
-                x===0 ||
-                x===cols-1
-            ){
-                map[y][x] = 1;
-            }else{
-                map[y][x] = 0;
-            }
-        }
-    }
-
-    // 木配置
-    const treeCount =
-        Math.floor(Math.random()*10)+20;
-
-    for(let i=0;i<treeCount;i++){
-
-        const x = Math.floor(Math.random()*11)+1;
-        const y = Math.floor(Math.random()*11)+1;
-
-        if(!(x===1 && y===1)){
-
-            map[y][x] = 2;
-        }
-    }
-
-    // 階段配置
-    let sx, sy;
-
-    do{
-
-        sx = Math.floor(Math.random()*11)+1;
-        sy = Math.floor(Math.random()*11)+1;
-
-    }while(map[sy][sx] !== 0);
-
-
-    map[sy][sx] = 3;
-
-    // 5階ごとに宿配置
-    if(
-        (index + 1) % 5 === 0 &&
-        (index + 1) < 30
-    ){
-
-        let ix, iy;
-
-        do{
-            ix = Math.floor(Math.random()*11)+1;
-            iy = Math.floor(Math.random()*11)+1;
-        }
-        while(map[iy][ix] !== 0);
-
-        map[iy][ix] = 4;
-    }
-
-    
-
-
-    // スタート周辺を空ける
-    map[1][1] = 0;
-    map[1][2] = 0;
-    map[2][1] = 0;
-    map[2][2] = 0;
-
-    return map;
-}
-
-
-
-let currentMapIndex = 0;
-let map = maps[currentMapIndex];
-
-const playerImgRight = new Image();
-playerImgRight.src = "img/hero_right.png";
-
-const playerImgLeft = new Image();
-playerImgLeft.src = "img/hero_left.png";
-
-const playerImgUp = new Image();
-playerImgUp.src = "img/hero_up.png";
-
-const playerImgDown = new Image();
-playerImgDown.src = "img/hero_down.png";
-function draw(){
-
-
-    party.forEach((friend, i) => {
-
-        const pos = trail[i];
-
-        if(pos){
-            friend.x = pos.x;
-            friend.y = pos.y;
-        }
-
-    });
-
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // マップ描画
-    for(let y=0; y<map.length; y++){
-        for(let x=0; x<map[y].length; x++){
-
-            if(map[y][x] === 0)
-                ctx.drawImage(grassImg,x*tileSize,y*tileSize,tileSize,tileSize);
-
-            if(map[y][x] === 1)
-                ctx.drawImage(wallImg,x*tileSize,y*tileSize,tileSize,tileSize);
-
-            if(map[y][x] === 2)
-                ctx.drawImage(treeImg,x*tileSize,y*tileSize,tileSize,tileSize);
-
-            if(map[y][x] === 3)
-                ctx.drawImage(stairsImg,x*tileSize,y*tileSize,tileSize,tileSize);
-            if(map[y][x] === 4)
-               ctx.drawImage(innImg,x * tileSize,y * tileSize,tileSize,tileSize
-    );       }
-    }
-
-
-
-    // 仲間描画
-    for(let i=0;i<party.length;i++){
-
-        const pos = trail[(i)];
-
-        if(!pos) continue;
-
-        const friendImage =
-            friendSets[i][direction];
-
-
-
-if(!friendImage){
-    console.log("friend image undefined", i, direction);
-    continue;
-}
-
-if(
-    !friendImage.complete ||
-    friendImage.naturalWidth === 0
-){
-    console.log("friend image load error", friendImage.src);
-    continue;
-}
-
-ctx.drawImage(
-    friendImage,
-    pos.x * tileSize,
-    pos.y * tileSize,
-    tileSize,
-    tileSize
-);
-    }
-
-    // 主人公描画
-    let heroImage = heroDown;
-
-    if(direction==="left") heroImage = heroLeft;
-    if(direction==="right") heroImage = heroRight;
-    if(direction==="up") heroImage = heroUp;
-    if(direction==="down") heroImage = heroDown;
-
-if(
-    heroImage.complete &&
-    heroImage.naturalWidth > 0
-){
-    ctx.drawImage(
-        heroImage,
-        player.x * tileSize,
-        player.y * tileSize,
-        tileSize,
-        tileSize
-    );
-}
-}
-  
-
-
-
-const heroLeft = new Image();
-heroLeft.src = "img/hero_left.png";
-
-const heroRight = new Image();
-heroRight.src = "img/hero_right.png";
-
-const heroUp = new Image();
-heroUp.src = "img/hero_up.png";
-
-const heroDown = new Image();
-heroDown.src = "img/hero_down.png";
-
-function movePlayer(dx,dy){
-
-    if(dx > 0) direction = "right";
-    if(dx < 0) direction = "left";
-    if(dy < 0) direction = "up";
-    if(dy > 0) direction = "down";
-
-    const nx = player.x + dx;
-    const ny = player.y + dy;
-
-if(
-    ny < 0 ||
-    ny >= map.length ||
-    nx < 0 ||
-    nx >= map[0].length
-){
- 
-        return;
-
-}
-if(
-    map[ny][nx] === 0 ||
-    map[ny][nx] === 3 ||
-    map[ny][nx] === 4
-){
-    
-trail.unshift({
-    x: player.x,
-    y: player.y
-});
-
-if(trail.length > 100){
-    trail.pop();
-}
-
-    player.x = nx;
-    player.y = ny;
-
-
-// 仲間を追従させる
-party.forEach((friend, i) => {
-
-    const pos = trail[i];
-
-    if(pos){
-        friend.x = pos.x;
-        friend.y = pos.y;
-    }
-
-});
-}
-
-if(map[player.y][player.x] === 3){
-
-    nextArea();
-}
-
-if(map[player.y][player.x] === 4){
-    visitInn();
-     draw();
-        return;   // ←追加
-}
-    draw();
-
-    if(!inBattle){
-        let encounterRate = Math.random();
-
-        if(encounterRate < 0.08){
-            startGame('N2');
-        }
-    }
-    if(
-    currentMapIndex >= 18 &&
-    currentMapIndex < 24 &&
-    !hasIceSword &&
-    Math.random() < 0.003
-){
-    getIceSword();
-    return;
-}
-
-}
-let trail = [];
-let floor = 1;
-
-
-function visitInn(){
-
-  let maxHp = 200; 
-  hp = maxHp;
-
-    updateStats();
-
-    startEvent([
-        {
-            img:"img/inn1.jpg",
-            text:"森の中に宿（やど）をみつけた"
-        },
-        {
-            img:"img/inn2.jpg",
-            text:"ペンギン：きょうは疲れたからもうねよう...。"
-        },
-                {
-            img:"img/inn2.jpg",
-            text:"HPがぜんかいふくした！"
-        }
-    ]);
-
-    map[player.y][player.x] = 0;
-}
-
-function nextArea(){
- inBattle = false
-    console.log("次のエリア");
-
- document.getElementById("game-container").style.display="none";
-    document.getElementById("field-screen").style.display="block";
-
-    floor++;
-    currentMapIndex++;
-
-// イベント発生
-
-
-
-    if(currentMapIndex >= maps.length){
-        alert("全30エリアクリア！");
-        location.reload();
-        return;
-    }
-    triggerAreaEvent();
-    map = maps[currentMapIndex];
-
-    updateMapTiles();
-    updateMonsterBackground();
-
-    // プレイヤーの位置
-    player.x = 1;
-    player.y = 1;
-
-    // trailを初期化
-    trail = [];
-
-    for(let i = 0; i < (party.length + 1) * 5; i++){
-        trail.push({
-            x: player.x,
-            y: player.y
-        });
-    }
-
-    // 仲間も同じ位置へ
-    party.forEach(friend=>{
-        friend.x = player.x;
-        friend.y = player.y;
-    });
-updateFieldStatus();
-    draw();
-}
-
-document.addEventListener("keydown",e=>{
-
-    if(e.key==="ArrowUp") movePlayer(0,-1);
-    if(e.key==="ArrowDown") movePlayer(0,1);
-    if(e.key==="ArrowLeft") movePlayer(-1,0);
-    if(e.key==="ArrowRight") movePlayer(1,0);
-
-});
-
-
-
-
-function updateMapTiles(){
-
-    if(currentMapIndex < 6){
-
-        grassImg.src = "img/grass_forest.png";
-        treeImg.src = "img/tree_forest.png";
-    }
-    else if(currentMapIndex < 12){
-
-        grassImg.src = "img/grass_cave.png";
-        treeImg.src = "img/rock.png";
-    }
-    else if(currentMapIndex < 18){
-
-        grassImg.src = "img/grass_desert.png";
-        treeImg.src = "img/cactus.png";
-    }
-    else if(currentMapIndex < 24){
-
-        grassImg.src = "img/snow.png";
-        treeImg.src = "img/ice.png";
-    }
-    else{
-
-        grassImg.src = "img/demonfloor.png";
-        treeImg.src = "img/lava.png";
-    }
-
-}
-
-
-
-
 
 function getMonsterByLevel() {
 
     if (bossBattle) return bossImage;
 
+    if (Math.random() < 0.05) {
+        isPotion = true;   // ★追加
+        return "monnene.jpg";
+    }
+
+    isPotion = false;      // ★重要
+
     let list;
 
-    if(currentMapIndex < 6){
-        list = monsters1; // 森
-    }
-    else if(currentMapIndex < 12){
-        list = monsters2; // 洞窟
-    }
-    else if(currentMapIndex < 18){
-        list = monsters3; // 砂漠
-    }
-    else if(currentMapIndex < 24){
-        list = monsters4; // 雪
-    }
-    else{
-        list = monsters5; // 魔界
-    }
+    if (lv <= 5) list = monsters1;
+    else if (lv <= 10) list = monsters2;
+    else if (lv <= 15) list = monsters3;
+    else list = monsters4;
 
-    return list[
-        Math.floor(Math.random() * list.length)
-    ];
+    return list[Math.floor(Math.random() * list.length)];
 }
 
     function updateStats() {
 
     while (exp >= 300) {
-        const oldLv = lv;
-        
         exp -= 300;
         lv++;
-        hp = Math.min(hp + 30, 200);
 
         seLevel.currentTime = 0;
         seLevel.play();
-
-
-    startEvent([
-        {
-            img:"img/levelup.png",
-            text:`ペンギンのレベルが ${oldLv} → ${lv} にあがった！`
-        },
-        {
-            img:"img/levelup.png",
-            text:"HPが30回復した！"
-        }
-    ]);
-}
-
 
         if (lv >= 20 && !bossBattle) {
             bossBattle = true;
@@ -1700,11 +748,11 @@ function getMonsterByLevel() {
             bossBgm.currentTime = 0;
             bossBgm.play();
         }
-    
+    }
 
     // ✅ ★これをここに入れる（超重要）
     updateMonsterBackground();
-　
+
     document.getElementById('hp').innerText = hp;
     document.getElementById('exp').innerText = exp;
     document.getElementById('lv').innerText = lv;
@@ -1712,19 +760,12 @@ function getMonsterByLevel() {
 
 //背景
 
-function updateFieldStatus(){
 
-    document.getElementById("field-lv").textContent = lv;
-    document.getElementById("field-hp").textContent = hp;
-    document.getElementById("field-exp").textContent = exp;
-    document.getElementById("field-floor").textContent = floor;
-
-}
     
         // 新しいモンスターを出す関数
         function changeMonster() {
 
-monsterImg.style.display = "block";
+
 
     if (bossBattle) {
         monsterImg.src = bossImage;
@@ -1738,21 +779,7 @@ monsterImg.style.display = "block";
 
         const newMonster = getMonsterByLevel();
 
-currentMonsterName =
-monsterNames[newMonster] || "なぞのモンスター";
-
         monsterImg.src = newMonster;
-
-document.getElementById("text").innerHTML =
-`
-${currentMonsterName}
-が<ruby>前<rt>まえ</rt></ruby>に
-<ruby>立<rt>た</rt></ruby>ちはだかった！<br>
-
-<ruby>説得<rt>せっとく</rt></ruby>するために
-<ruby>問題<rt>もんだい</rt></ruby>に
-<ruby>答<rt>こた</rt></ruby>えよう！
-`;
 
         monsterImg.classList.remove("float");
         void monsterImg.offsetWidth; // リセット
@@ -1765,82 +792,52 @@ ${currentMonsterName}
 
 function getAreaName() {
 
-    if (bossBattle) return "Demon King Castle";
+    // ★最初（ゲーム始まる前）
+    if (!isBgmPlaying) return "START";
 
-    if(currentMapIndex < 6){
-        return "Forest";
-    }
-    else if(currentMapIndex < 12){
-        return "Cave";
-    }
-    else if(currentMapIndex < 18){
-        return "Desert";
-    }
-    else if(currentMapIndex < 24){
-        return "Snow Land";
-    }
-    else{
-        return "Demon Realm";
-    }
+    // ★ボス
+    if (bossBattle) return "Castle";
+
+    if (lv <= 5) return "Forest";
+    if (lv <= 10) return "Cave";
+    if (lv <= 15) return "Abyss";
+    return "Demon Realm";
 }
 
 
-function getWinImage(){
 
-    if(currentMapIndex < 6){
-        return "img/penguinwin.png";
-    }
-    else if(currentMapIndex < 12){
-        return "img/penguinwin2.png";
-    }
-    else if(currentMapIndex < 18){
-        return "img/penguinwin3.png";
-    }
-    else if(currentMapIndex < 24){
-        return "img/penguinwin4.png";
-    }
-
-    else{
-        return "img/demonwin.png";
-    }
-}
 
 
     let currentAnswer = "";
 
-
 function loadQuestion() {
+document.getElementById('area-name').innerText = getAreaName();
+    let list;
 
-    document.getElementById('area-name').innerText = getAreaName();
+    // 仮（あとで増やせる）
+if (currentLevel === "N3") {
+    list = questions;
+}
+else if (currentLevel === "N2") {
+    list = questions2;
+}
+else if (currentLevel === "N1") {
+    list = questions3;
+}
 
-    const list = questions2;
-
-    const qData =
-    list[Math.floor(Math.random() * list.length)];
-
+    const qData = list[Math.floor(Math.random() * list.length)];
 
     currentAnswer = qData.a;
-const imgEl = document.getElementById("question-image");
 
-if(qData.img){
-
-    imgEl.src = qData.img;
-    imgEl.style.display = "block";
-
-}else{
-
-    imgEl.style.display = "none";
-
-}
     document.getElementById('text').innerHTML =
-        `<b></b><br>${qData.q}`;
+        `<b>【${currentLevel}問題】</b><br>${qData.q}`;
 
     const optionsDiv = document.getElementById('options');
     optionsDiv.innerHTML = '';
 
     qData.ops.sort(() => Math.random() - 0.5).forEach(op => {
         const btn = document.createElement('button');
-        btn.innerHTML = op;
+        btn.innerText = op;
         btn.onclick = () => checkAnswer(op, qData.a);
         optionsDiv.appendChild(btn);
     });
@@ -1859,7 +856,7 @@ shakeMonster();
         // ✅ モンエネ処理
         if (isPotion) {
 
-            hp = Math.min(hp + 30, 200);
+            hp = Math.min(hp + 20, 100);
 
             textEl.innerHTML =
             "<span style='color:#0ff'>モンエネを飲んだ！HP回復！</span>";
@@ -1879,6 +876,9 @@ shakeMonster();
 
                 // ✅ 5連続でエンディング
                 if (bossStreak >= 5) {
+
+                    const ending = clearEndings[Math.floor(Math.random() * clearEndings.length)];
+
                     // BGM停止
                     audio.pause();
                     bossBgm.pause();
@@ -1886,18 +886,9 @@ shakeMonster();
                     // エンディングBGM
                     endingBgm.currentTime = 0;
                     endingBgm.play();
-startEnding();   
-return;
+
                     // 画像
-                    
-monsterImg.style.display = "none";
-monsterArea.style.backgroundImage =
-    `url('${ending.img}')`;
-
-monsterArea.style.height = "300px";
-monsterArea.style.backgroundSize = "cover";
-monsterArea.style.backgroundPosition = "center";
-
+                    monsterImg.src = ending.img;
 
                     // メッセージ
                     textEl.innerHTML = `
@@ -1916,83 +907,21 @@ monsterArea.style.backgroundPosition = "center";
                 // ✅ ボスダメージ表示
                 textEl.innerHTML =
                 `<span style='color:#ff0'>
-                ガーディアンにダメージ！<br>
+                魔王にダメージ！<br>
                 ${bossStreak}/5
                 </span>`;
 
-                
-setTimeout(() => {
-    loadQuestion();
-}, 1200);
-return;
+            } else {
+                // ✅ 通常戦
+                exp += 5000;
 
- 
-} else {
-    const hitRate = getHitRate();
+                textEl.innerHTML =
+                "<span style='color:#0f0'>正解！モンスター撃破！</span>";
 
-if(Math.random() > hitRate){
-
-    document.getElementById("text").innerHTML =
-    `
-  
-<span style="color:#ff0">
-    <ruby>正解<rt>せいかい</rt></ruby>した！<br>
-    しかし<ruby>相手<rt>あいて</rt></ruby>は<ruby>納得<rt>なっとく</rt></ruby>しない！
-</span>
-
-    `;
-
-    setTimeout(()=>{
-        loadQuestion();
-    },1200);
-
-    return;
-}
-    exp += getExpReward();
-
-    battleWin = true;
-battleBgm.pause();
-bossBgm.pause();
-
-seDamage.currentTime = 0;
-seDamage.play();
-updateStats();
-setTimeout(() => {
-
-    winBgm.currentTime = 0;
-    winBgm.play();
-
-}, 500);
-
-
-textEl.innerHTML = `
-<span style="color:#0f0">
-せいかい！${currentMonsterName} は納得した！<br>
-<ruby>経験値<rt>けいけんち</rt></ruby>を
-${getExpReward()}
-<ruby>獲得<rt>かくとく</rt></ruby>！
-</span>
-`;
-
-
-    document.getElementById("monster-img").style.display="none";
-
-
-
-document.getElementById("skillButtons").style.display = "none";
-
-
-document.getElementById("options").innerHTML =
-`
-<img src="${getWinImage()}" class="win-image float">
-`;
-
-    updateStats();
-
-    return;
-
-}
-
+                setTimeout(() => {
+                    changeMonster();
+                }, 500);
+            }
 
             seHit.currentTime = 0;
             seHit.play();
@@ -2009,12 +938,11 @@ document.getElementById("options").innerHTML =
 
             isPotion = false;
 
-            returnToField();
+            changeMonster();
 
-updateStats();
-setTimeout(() => {
-    loadQuestion();
-}, 1200)
+            setTimeout(() => {
+                loadQuestion();
+            }, 800);
 
             return;
         }
@@ -2023,10 +951,10 @@ setTimeout(() => {
         document.body.style.background = "#400";
 
         setTimeout(() => {
-            document.body.style.background = "#0078cd";
+            document.body.style.background = "#000";
         }, 200);
 
-        hp -= 5;
+        hp -= 20;
 
         if (bossBattle) {
 
@@ -2042,7 +970,7 @@ setTimeout(() => {
 
             textEl.innerHTML =
             `<span style='color:#f00'>
-            ミス！5ダメージ<br>
+            ミス！20ダメージ<br>
             正解：${correct}
             </span>`;
         }
@@ -2061,290 +989,17 @@ setTimeout(() => {
             bossBattle = false;
             bossStreak = 0;
 
-            bossBgm.pause();
-            audio.play();
-
-            returnToField();
-             return;
+            changeMonster();
         }
-        
-updateStats();
-
-setTimeout(() => {
-    loadQuestion();
-}, 1200);
-
-return;
-
     }
-
-  
-    
-}
-
-function getExpReward(){
-
-    if(currentMapIndex < 6) return 20;
-    if(currentMapIndex < 12) return 30;
-    if(currentMapIndex < 18) return 40;
-    if(currentMapIndex < 24) return 50;
-
-    return 60;
-}
-function returnToField(){
-
-    inBattle = false;
-
-    document.querySelector(".crossKey").style.display = "flex";
-
-    document.getElementById("game-container").style.display = "none";
-    document.getElementById("field-screen").style.display = "block";
-
-    battleBgm.pause();
-    bossBgm.pause();
-
-    winBgm.pause();
-    winBgm.currentTime = 0;
-
-    if(fieldBgm.paused){
-        fieldBgm.currentTime = 0;
-        fieldBgm.play();
-    }
-}
-   draw();
- 
-function useHeal(){
-
-    if(!canHeal){
-        alert("回復は使えません");
-        return;
-    }
-
-    if(!inBattle){
-        alert("戦闘中のみ使用できます");
-        return;
-    }
-
-    hp = Math.min(hp + 30, 200);
-
-    // 回復SE
-    seHeal.currentTime = 0;
-    seHeal.play();
 
     updateStats();
 
-
-document.getElementById("text").innerHTML =
-"🦦 カワウソが<ruby>応援<rt>おうえん</rt></ruby>した！<br>HPが30<ruby>回復<rt>かいふく</rt></ruby>した！";
-
-
-
-
-    canHeal = false;
-
-
-document.getElementById("healBtn").innerHTML =
-"🦦 <ruby>回復<rt>かいふく</rt></ruby> <ruby>使用済<rt>しようずみ</rt></ruby>"
-
-
-    document.getElementById("healBtn").disabled = true;
-
-    seHeal.currentTime = 0;
-    seHeal.play();
-}
-function changeQuestionSkill(){
-
-    if(!canChangeQuestion){
-        alert("問題変更は使えません");
-        return;
-    }
-
-    if(!inBattle){
-        alert("戦闘中のみ使用できます");
-        return;
-    }
-
-    canChangeQuestion = false;
-
-    document.getElementById("changeBtn").disabled = true;
-
-document.getElementById("changeBtn").innerHTML =
-"🐋 <ruby>問題変更<rt>もんだいへんこう</rt></ruby> <ruby>使用済<rt>しようずみ</rt></ruby>";
-
-document.getElementById("text").innerHTML =
-"🐋 シャチが<ruby>問題<rt>もんだい</rt></ruby>を<ruby>流<rt>なが</rt></ruby>した！";
-    setTimeout(()=>{
+    setTimeout(() => {
         loadQuestion();
-    },500);
+    }, 1200);
 }
-function useHint(){
-
-    if(!canHint){
-        alert("ヒントは使えません");
-        return;
-    }
-
-    if(!inBattle){
-        alert("戦闘中のみ使用できます");
-        return;
-    }
-
-    const buttons =
-    document.querySelectorAll("#options button");
-
-    let wrongButtons = [];
-
-    buttons.forEach(btn=>{
-
-        if(btn.innerText !== currentAnswer){
-            wrongButtons.push(btn);
-        }
-
-    });
-
-wrongButtons.sort(()=>Math.random()-0.5);
-
-// 不正解を2つ消す
-wrongButtons[0].style.display = "none";
-wrongButtons[1].style.display = "none";
-
-canHint = false;
-
-document.getElementById("hintBtn").innerHTML =
-"🐬 2択ヒント 使用済";
-
-document.getElementById("hintBtn").disabled = true;
-
-const oldQuestion =
-document.getElementById("text").innerHTML;
-
-document.getElementById("text").innerHTML =
-"🐬 イルカがヒントをくれた！";
-
-setTimeout(()=>{
-    document.getElementById("text").innerHTML =
-    oldQuestion;
-},1000);
-}
-function useFreezeStorm(){
-
-    if(!canFreezeStorm){
-        return;
-    }
-
-    if(!inBattle){
-        return;
-    }
-
-    canFreezeStorm = false;
-
-    document.getElementById("iceBtn").disabled = true;
-    document.getElementById("iceBtn").innerHTML =
-    "❄️ 使用済";
-
-    document.getElementById("text").innerHTML =
-    `
-    ❄️ フリーズストーム発動！
-    <br>
-    吹雪が敵を包み込んだ！
-    `;
-
-    setTimeout(()=>{
-
-        exp += getExpReward();
-
-        battleWin = true;
-
-        updateStats();
-
-        document.getElementById("monster-img").style.display =
-        "none";
-
-        document.getElementById("skillButtons").style.display =
-        "none";
-
-        document.getElementById("text").innerHTML =
-        `
-        <span style="color:#8ff">
-        氷の力で敵を説得した！
-        <br>
-        経験値を ${getExpReward()} 獲得！
-        </span>
-        `;
-    document.getElementById("options").innerHTML = `
-        <img src="${getWinImage()}" class="win-image float">
-    `;
-    battleBgm.pause();
-    bossBgm.pause();
-    winBgm.currentTime = 0;
-    winBgm.play();
-    },1000);
-}
-
-
-function pressOK() {
-
-    // エンディング中
-    if(endingMode){
-        nextEnding();
-        return;
-    }
-
-    if(eventMode){
-
-        eventIndex++;
-
-        if(eventIndex >= eventMessages.length){
-
-            closeEvent();
-            return;
-        }
-
-        showEventMessage();
-        return;
-    }
-
-    if (battleWin) {
-document.getElementById("options").innerHTML = "";
-        battleWin = false;
-        changeMonster();
-        returnToField();
-        winBgm.pause();
-winBgm.currentTime = 0;
-
-    }
-}
-function regenerateMap(){
-
-    // 戦闘中は使えない
-    if(inBattle) return;
-
-   maps[currentMapIndex] = generateMap(currentMapIndex);
-
-    map = maps[currentMapIndex];
-
-    // プレイヤー位置リセット
-    player.x = 1;
-    player.y = 1;
-
-    // 仲間位置リセット
-    trail = [];
-
-    for(let i=0;i<(party.length+1)*5;i++){
-        trail.push({
-            x:1,
-            y:1
-        });
-    }
-
-    party.forEach(friend=>{
-        friend.x = 1;
-        friend.y = 1;
-    });
-
-    draw();
-}
-
-</script>
+    
+    </script>
     </body>
     </html>
